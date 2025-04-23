@@ -1,6 +1,4 @@
 import axios from 'axios'
-// import { MessageBox, Message } from 'element-ui'
-// import store from '@/store'
 
 import {
   getToken,
@@ -52,7 +50,7 @@ service.interceptors.response.use(
 
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 20000) {
-      Message({
+      ElMessage({
         message: res.message || 'Error',
         type: 'error',
         duration: 5 * 1000
@@ -61,7 +59,7 @@ service.interceptors.response.use(
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
       if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
         // to re-login
-        MessageBox.confirm(
+        ElMessageBox.confirm(
           'You have been logged out, you can cancel to stay on this page, or log in again',
           'Confirm logout', {
             confirmButtonText: 'Re-Login',
@@ -79,7 +77,7 @@ service.interceptors.response.use(
   },
   error => {
     console.log('err' + error) // for debug
-    Message({
+    ElMessage({
       message: error.message,
       type: 'error',
       duration: 5 * 1000
