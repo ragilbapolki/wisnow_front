@@ -1,0 +1,21 @@
+const context = import.meta.glob('./svg/*', {
+  eager: true,
+  query: '?component',
+})
+
+const res = {}
+
+for (const path in context) {
+  let [fileName, fileType] = path.match(/([^/]+)$/)[0].split('.')
+  if (fileType !== 'svg') continue
+  res[fileName] = context[path]
+}
+
+console.log(res)
+export default res
+
+// Object.keys(context).map((path) => {
+//   context[path]().then((mod) => {
+//     console.log(path, mod)
+//   })
+// })

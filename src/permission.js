@@ -15,23 +15,24 @@ NProgress.configure({
 })
 
 // no redirect whitelist
-const whiteList = ['/login']
+const whiteList = ['/account/login']
 
 router.beforeEach(async (to, from, next) => {
   // start progress bar
   NProgress.start()
 
   // set page title
-  document.title = `${to.meta.title} - Vue Admin`
+  document.title = to.meta.title ? `${to.meta.title} - Vue Admin` : `Vue Admin`
 
   // determine whether the user has logged in
   const hasToken = getToken()
 
   if (hasToken) {
-    if (to.path === '/login') {
+    if (to.path === '/account/login') {
       // if is logged in, redirect to the home page
       next({
-        path: '/',
+        // path: '/',
+        name: 'home'
       })
       NProgress.done()
     } else {
@@ -42,30 +43,18 @@ router.beforeEach(async (to, from, next) => {
         try {
           // get user info
           const {
-            data
+            body
           } = await getInfo(hasToken)
-
-          if (!data) {
-            // return reject('Verification failed, please Login again.')
+          if (!body) {
             throw new Error("Verification failed, please Login again.");
           }
-
-          const {
-            name,
-            avatar
-          } = data
-
-          console.log(name, avatar, data)
-
-          // commit('SET_NAME', name)
-          // commit('SET_AVATAR', avatar)
-
+          ctx.userInfo = body
           next()
         } catch (error) {
           // remove token and go to login page to re-login
           removeToken()
           ElMessage.error(error || 'Has Error')
-          next(`/login?redirect=${to.path}`)
+          next(`/account/login?redirect=${to.path}`)
           NProgress.done()
         }
       }
@@ -78,7 +67,7 @@ router.beforeEach(async (to, from, next) => {
       next()
     } else {
       // other pages that do not have permission to access are redirected to the login page.
-      next(`/login?redirect=${to.path}`)
+      next(`/account/login?redirect=${to.path}`)
       NProgress.done()
     }
   }

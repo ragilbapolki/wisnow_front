@@ -22,7 +22,7 @@ service.interceptors.request.use(
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['X-Token'] = token
+      config.headers['token'] = token
     }
     return config
   },
@@ -76,7 +76,7 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
+    console.log('err ' + error) // for debug
     ElMessage({
       message: error.message,
       type: 'error',
