@@ -15,14 +15,12 @@
 
 [综合对比后2个方案](https://npmpackage.info/)后，选择了`@spiriit/vite-plugin-svg-spritemap`，它文档完整，下载量更多，发布版本多。它的[文档](https://spiriitlabs.github.io/vite-plugin-svg-spritemap/)
 
-### mockjs
+### 数据模拟方案：msw+faker
 
 mockjs已经不再维护了，替代方案如下：
 * [faker-js](https://github.com/faker-js/faker) 生成数据
-* [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter) 请求拦截的方式
-* [msw] 
-
-最后看了《[前端 Mock 数据方案，我是如何选择的？](https://juejin.cn/post/7274893714971344953)》这篇文章，我采用了MSW + Faker，作者也提供了[demo](https://github.com/codexu/msw-mock-demo)
+* [axios-mock-adapter](https://github.com/ctimmerm/axios-mock-adapter) API请求模拟库
+* [msw](https://mswjs.io/) API请求模拟库
 
 msw在本地执行`npx msw init ./mack --save`命令，生成mockServiceWorker.js[Managing the worker](https://mswjs.io/docs/best-practices/managing-the-worker/)
 在浏览器中设置msw[Browser integration](https://mswjs.io/docs/integrations/browser)
