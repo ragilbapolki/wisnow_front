@@ -22,8 +22,18 @@ async function enableMocking() {
   // `worker.start()` returns a Promise that resolves
   // once the Service Worker is up and ready to intercept requests.
   return worker.start({
+    // quiet: true, // Disables all the logging from the library (e.g. the activation message, the intercepted requests’ messages).
     serviceWorker: {
       url: '../mockServiceWorker.js',
+    },
+    // Decide how to react to unhandled requests (i.e. those that do not have a matching request handler).
+    // filter warnings
+    onUnhandledRequest(request, print) {
+      const url = new URL(request.url)
+      if (url.pathname.includes('/prod-api') || url.pathname.includes('/dev-api')) {
+        print.warning()
+      }
+      return
     },
   })
 }
