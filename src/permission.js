@@ -2,13 +2,16 @@ import router from './router'
 import {
   getInfo
 } from './api/user'
-import ctx from './utils/context'
+import {
+  ctx,
+  dispatch
+} from './store'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-import {
-  getToken,
-  removeToken
-} from './utils/auth'
+// import {
+//   getToken,
+//   removeToken
+// } from './store/user'
 
 NProgress.configure({
   showSpinner: false,
@@ -25,9 +28,10 @@ router.beforeEach(async (to, from, next) => {
   document.title = to.meta.title ? `${to.meta.title} - Vue Admin` : `Vue Admin`
 
   // determine whether the user has logged in
-  const hasToken = getToken()
+  const hasToken = dispatch.user.getToken()
 
   if (hasToken) {
+
     if (to.path === '/account/login') {
       // if is logged in, redirect to the home page
       next({
@@ -35,7 +39,8 @@ router.beforeEach(async (to, from, next) => {
       })
       NProgress.done()
     } else {
-      const hasUserInfo = ctx.userInfo
+      const hasUserInfo = ctx.userInfo.name
+
       if (hasUserInfo) {
         next()
       } else {
@@ -47,11 +52,11 @@ router.beforeEach(async (to, from, next) => {
           if (!body) {
             throw new Error("Verification failed, please Login again.");
           }
-          ctx.userInfo = body
+          dispatch.user.saveInfo(body)
           next()
         } catch (error) {
           // remove token and go to login page to re-login
-          removeToken()
+          dispatch.user.removeToken()
           ElMessage.error(error || 'Has Error')
           next(`/account/login?redirect=${to.path}`)
           NProgress.done()

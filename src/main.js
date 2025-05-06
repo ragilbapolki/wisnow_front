@@ -7,9 +7,10 @@ import {
 } from 'vue'
 import App from './App.vue'
 import router from './router'
-
 import SvgIcon from './components/SvgIcon.vue'
-import context from './utils/context'
+import {
+  ctx
+} from './store'
 
 async function enableMocking() {
   if (import.meta.env.MODE !== 'development') {
@@ -46,7 +47,7 @@ enableMocking().then(async () => {
 
   app.use(router)
 
-  app.provide('context', context)
+  app.provide('context', ctx)
   app.component('svg-icon', SvgIcon)
 
   app.mount('#app')

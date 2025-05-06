@@ -51,10 +51,6 @@ export default [
     return HttpResponse.json({
       code: 20000,
       body: token
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     })
   }),
 
@@ -75,12 +71,17 @@ export default [
     return HttpResponse.json({
       code: 20000,
       body: info
-    }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
     })
-  })
+  }),
+
+  http.post('/dev-api/user/logout', async () => {
+    return HttpResponse.json({
+      code: 20000,
+      message: 'success'
+    })
+  }),
+
+
 
 
 

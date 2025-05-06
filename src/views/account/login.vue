@@ -68,7 +68,7 @@ import { useRouter, useRoute } from 'vue-router'
 
 import { validUsername } from '@/utils/validate'
 import { login } from '@/api/user'
-import { setToken } from '@/utils/auth'
+import { dispatch } from '@/store'
 
 const router = useRouter()
 const route = useRoute()
@@ -120,7 +120,7 @@ const handleLogin = () => {
             loading.value = true
             login(loginForm)
                 .then((res) => {
-                    setToken(res.body.token)
+                    dispatch.user.setToken(res.body.token)
                     router.push(redirect)
                     loading.value = false
                 })
