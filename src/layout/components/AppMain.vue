@@ -1,14 +1,15 @@
 <template>
   <section class="app-main">
     <router-view v-slot="{ Component }">
-      <transition mode="out-in" name="fade-transform">
-        <!-- <keep-alive v-if="$route.meta.keepAlive"> -->
+      <keep-alive v-if="$route.meta.keepAlive">
+        <transition mode="out-in" name="fade-transform">
+          <component :is="Component" />
+        </transition>
+      </keep-alive>
+
+      <transition mode="out-in" name="fade-transform" v-if="!$route.meta.keepAlive">
         <component :is="Component" />
-        <!-- </keep-alive> -->
       </transition>
-      <!-- <transition mode="out-in" name="fade-transform">
-        <component :is="Component" v-if="!$route.meta.keepAlive" />
-      </transition>-->
     </router-view>
   </section>
 </template>
