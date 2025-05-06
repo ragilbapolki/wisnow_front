@@ -50,17 +50,4 @@ const activeMenu = computed(() => {
     }
     return path
 })
-
-// onBeforeRouteUpdate((to) => {
-//     console.log('路由即将更新:', to.path)
-//     // 在这里执行你的逻辑
-// })
-
-// computed: {
-
-//     variables() {
-//         return variables
-//     },
-
-// },
 </script>
