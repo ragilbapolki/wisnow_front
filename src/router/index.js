@@ -19,28 +19,48 @@ const router = createRouter({
       component: Layout,
       redirect: '/dashboard',
       children: [{
-          path: 'dashboard',
-          name: 'Dashboard',
-          component: () => import('@/views/dashboard.vue'),
-          meta: {
-            title: 'Dashboard',
-            icon: 'dashboard',
-            keepAlive: false
-          }
-        },
-        {
-          path: '/about',
-          name: 'About',
-          meta: {
-            title: 'about',
-            icon: 'about'
-          },
-          // route level code-splitting
-          // this generates a separate chunk (About.[hash].js) for this route
-          // which is lazy-loaded when the route is visited.
-          component: () => import('@/views/AboutView.vue'),
-        },
-      ]
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/dashboard.vue'),
+        meta: {
+          title: 'Dashboard',
+          icon: 'dashboard',
+          keepAlive: true
+        }
+      }, ]
+    },
+    {
+      path: '/about',
+      component: Layout,
+      children: [{
+        path: 'about',
+        name: 'About',
+        component: () => import('@/views/AboutView.vue'),
+        meta: {
+          title: 'About',
+          icon: 'about',
+          keepAlive: true
+        }
+      }, ]
+    },
+    {
+      path: '/example',
+      component: Layout,
+      redirect: '/example/table',
+      meta: {
+        title: 'Example',
+        // icon: 'el-icon-s-help'
+        icon: 'example'
+      },
+      children: [{
+        path: 'table',
+        name: 'Table',
+        component: () => import('@/views/table.vue'),
+        meta: {
+          title: 'Table',
+          icon: 'table',
+        }
+      }, ]
     },
 
   ],
