@@ -10,11 +10,6 @@
 <script setup>
 </script>
 
-<style>
-body {
-    background: #966;
-}
-</style>
 <style lang="scss" scoped>
 $dark_gray: #889aa4;
 

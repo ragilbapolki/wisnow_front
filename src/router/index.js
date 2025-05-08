@@ -63,16 +63,16 @@ const router = createRouter({
             icon: 'table',
           }
         },
-        // {
-        //   path: 'tree',
-        //   name: 'Tree',
-        //   meta: {
-        //     title: 'Tree',
-        //     // icon: 'tree'
-        //     icon: 'el-icon-s-help',
-        //   },
-        //   component: () => import('@/views/tree.vue'),
-        // },
+        {
+          path: 'tree',
+          name: 'Tree',
+          meta: {
+            title: 'Tree',
+            // icon: 'tree'
+            icon: 'el-icon-s-help',
+          },
+          component: () => import('@/views/tree.vue'),
+        },
       ]
     },
 
