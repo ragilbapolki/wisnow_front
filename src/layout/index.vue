@@ -16,8 +16,8 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, computed } from 'vue'
-import { onBeforeRouteUpdate } from 'vue-router'
+import { onMounted, onUnmounted, computed, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import Navbar from './components/Navbar.vue'
 import Sidebar from './components/Sidebar/index.vue'
@@ -26,12 +26,16 @@ import AppMain from './components/AppMain.vue'
 import { isMobile, resizeHandler } from './mixin/ResizeHandler'
 import { sctx, ctx, dispatch } from '@/store'
 
-onBeforeRouteUpdate(() => {
-    if (ctx.device === 'mobile' && ctx.sidebar.opened) {
-        dispatch.sidebar.close({ withoutAnimation: false })
+const route = useRoute()
+
+watch(
+    () => route.path,
+    () => {
+        if (ctx.device === 'mobile' && ctx.sidebar.opened) {
+            dispatch.sidebar.close({ withoutAnimation: false })
+        }
     }
-    // 在这里执行你的逻辑
-})
+)
 
 onMounted(() => {
     window.addEventListener('resize', resizeHandler)

@@ -53,14 +53,24 @@ const router = createRouter({
         icon: 'example'
       },
       children: [{
-        path: 'table',
-        name: 'Table',
-        component: () => import('@/views/table.vue'),
-        meta: {
-          title: 'Table',
-          icon: 'table',
-        }
-      }, ]
+          path: 'table',
+          name: 'Table',
+          component: () => import('@/views/table.vue'),
+          meta: {
+            title: 'Table',
+            icon: 'table',
+          }
+        },
+        {
+          path: '/tree',
+          name: 'Tree',
+          meta: {
+            title: 'Tree',
+            icon: 'tree'
+          },
+          component: () => import('@/views/tree.vue'),
+        },
+      ]
     },
 
   ],

@@ -1,0 +1,58 @@
+import {
+  h
+} from 'vue'
+import SvgIcon from '@/components/SvgIcon.vue'
+
+
+
+const RenderTemplate = (props, context) => {
+  console.log(context.slots)
+  const {
+    icon,
+    title
+  } = props
+  const vnodes = []
+  if (icon) {
+    if (icon.includes('el-icon')) {
+      vnodes.push(
+        h('i', {
+          class: [icon, 'sub-el-icon'],
+          style: {
+            color: 'currentColor',
+            width: '1em',
+            height: '1em',
+          },
+        })
+      )
+    } else {
+      vnodes.push(
+        h(SvgIcon, {
+          icon: icon,
+        })
+      )
+    }
+  }
+  if (title) {
+    vnodes.push(
+
+      // h('template', null, {
+      //   default: () => 'default slot',
+      //   foo: () => h('div', 'foo'),
+      //   bar: () => [h('span', 'one'), h('span', 'two')]
+      // })
+
+      h(
+        'div', {
+          slot: 'title',
+        },
+        title
+        // [h('slot', {}, title)]
+      )
+    )
+  }
+  return vnodes
+}
+
+RenderTemplate.props = ['icon', 'title']
+
+export default RenderTemplate
