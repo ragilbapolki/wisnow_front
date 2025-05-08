@@ -1,23 +1,34 @@
 <template>
   <div v-if="!item.hidden">
-    <template
-      v-if="hasOneShowingChild(item.children, item) && (!onlyOneChild.children||onlyOneChild.noShowingChildren)&&!item.alwaysShow"
-    >
-      <app-link :to="resolvePath(onlyOneChild.path)" v-if="onlyOneChild.meta">
-        <el-menu-item :index="resolvePath(onlyOneChild.path)" class="submenu-title-noDropdown">
-          <!-- <span>1</span>
-          <template #title>Navigator Four</template>-->
-          <item
-            :icon="onlyOneChild.meta.icon||(item.meta&&item.meta.icon)"
-            :title="1+onlyOneChild.meta.title"
-          />
+    <template v-if=" !alwaysShow && theOnlyOneChild && !theOnlyOneChild.children">
+      <app-link :to="resolvePath(theOnlyOneChild.path)" v-if="theOnlyOneChild.meta">
+        <el-menu-item :index="resolvePath(theOnlyOneChild.path)" class="submenu-title-noDropdown">
+          <template v-if="theOnlyOneChild.meta.icon">
+            <el-icon class="el-menu-icon" v-if="theOnlyOneChild.meta.icon.includes('el-icon')">
+              <i-ep-MoreFilled />
+            </el-icon>
+
+            <svg-icon :icon="theOnlyOneChild.meta.icon" v-else />
+          </template>
+          <template #title v-if="theOnlyOneChild.meta.title">
+            <span>{{theOnlyOneChild.meta.title}}</span>
+          </template>
         </el-menu-item>
       </app-link>
     </template>
 
     <el-sub-menu :index="resolvePath(item.path)" popper-append-to-body ref="subMenu" v-else>
-      <template v-slot:title>
-        <item :icon="item.meta.icon" :title="2+item.meta.title" v-if="item.meta" />
+      <template #title>
+        <template v-if="item.meta.icon">
+          <el-icon class="el-menu-icon" v-if="item.meta.icon.includes('el-icon')">
+            <i-ep-MoreFilled />
+          </el-icon>
+
+          <svg-icon :icon="item.meta.icon" v-else />
+        </template>
+        <template v-if="item.meta.title">
+          <span>{{item.meta.title}}</span>
+        </template>
       </template>
       <sidebar-item
         :base-path="resolvePath(child.path)"
@@ -34,7 +45,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { isExternal } from '@/utils/validate'
-import Item from './Item'
 import AppLink from './Link.vue'
 import path from 'path-browserify-esm'
 
@@ -51,36 +61,31 @@ const props = defineProps({
     },
 })
 
-const onlyOneChild = ref(null)
 const subMenu = ref(null)
 
 onMounted(() => {
     // fixBugIniOS()
 })
 
-const hasOneShowingChild = (children = [], parent) => {
-    const showingChildren = children.filter((item) => {
-        if (item.hidden) {
-            return false
-        } else {
-            // Temp set(will be used if only has one showing child)
-            onlyOneChild.value = item
-            return true
-        }
-    })
-    // When there is only one child router, the child router is displayed by default
-    if (showingChildren.length === 1) {
-        return true
-    }
+/** 是否始终显示根菜单 */
+const alwaysShow = props.item.meta?.alwaysShow
 
-    // Show parent if there are no child router to display
-    if (showingChildren.length === 0) {
-        onlyOneChild.value = { ...parent, path: '', noShowingChildren: true }
-        return true
-    }
+/** 显示的子菜单 */
+const showingChildren = props.item.children?.filter((child) => !child.meta?.hidden) ?? []
 
-    return false
-}
+/** 唯一的子菜单项 */
+const theOnlyOneChild = (function () {
+    const number = showingChildren.length
+    switch (true) {
+        case number > 1:
+            return null
+        case number === 1:
+            return showingChildren[0]
+        default:
+            return { ...props.item, path: '' }
+    }
+})()
+
 const resolvePath = (routePath) => {
     if (isExternal(routePath)) {
         return routePath

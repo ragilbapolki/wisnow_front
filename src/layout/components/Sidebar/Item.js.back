@@ -6,7 +6,6 @@ import SvgIcon from '@/components/SvgIcon.vue'
 
 
 const RenderTemplate = (props, context) => {
-  console.log(context.slots)
   const {
     icon,
     title

@@ -38,7 +38,7 @@ const router = createRouter({
         component: () => import('@/views/AboutView.vue'),
         meta: {
           title: 'About',
-          icon: 'about',
+          icon: 'el-icon-s-help',
           keepAlive: true
         }
       }, ]
@@ -47,7 +47,9 @@ const router = createRouter({
       path: '/example',
       component: Layout,
       redirect: '/example/table',
+
       meta: {
+        alwaysShow: true,
         title: 'Example',
         // icon: 'el-icon-s-help'
         icon: 'example'
@@ -61,15 +63,16 @@ const router = createRouter({
             icon: 'table',
           }
         },
-        {
-          path: '/tree',
-          name: 'Tree',
-          meta: {
-            title: 'Tree',
-            icon: 'tree'
-          },
-          component: () => import('@/views/tree.vue'),
-        },
+        // {
+        //   path: 'tree',
+        //   name: 'Tree',
+        //   meta: {
+        //     title: 'Tree',
+        //     // icon: 'tree'
+        //     icon: 'el-icon-s-help',
+        //   },
+        //   component: () => import('@/views/tree.vue'),
+        // },
       ]
     },
 

@@ -16,6 +16,10 @@ import Components from 'unplugin-vue-components/vite'
 import {
   ElementPlusResolver
 } from 'unplugin-vue-components/resolvers'
+
+import Icons from 'unplugin-icons/vite'
+import IconsResolver from 'unplugin-icons/resolver'
+
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 
 // const __dirname = path.resolve()
@@ -29,10 +33,27 @@ export default defineConfig({
     vue(),
     vueDevTools(),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [
+        ElementPlusResolver(),
+        // Auto import icon components
+        // 自动导入图标组件
+        IconsResolver({
+          prefix: 'Icon'
+        })
+      ],
+
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [
+        ElementPlusResolver(),
+        // 自动注册图标组件
+        IconsResolver({
+          enabledCollections: ['ep'],
+        }),
+      ],
+    }),
+    Icons({
+      autoInstall: true, // 自动安装了 @iconify-json/ep
     }),
   ],
   resolve: {
