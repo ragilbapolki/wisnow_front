@@ -5,6 +5,11 @@ import {
 // import HomeView from '../views/HomeView.vue'
 
 import Layout from '@/layout/index.vue'
+import {
+  MoreFilled,
+  HelpFilled,
+  Menu,
+} from '@element-plus/icons-vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,7 +43,7 @@ const router = createRouter({
         component: () => import('@/views/AboutView.vue'),
         meta: {
           title: 'About',
-          icon: 'el-icon-s-help',
+          icon: HelpFilled,
           keepAlive: true
         }
       }, ]
@@ -51,8 +56,8 @@ const router = createRouter({
       meta: {
         alwaysShow: true,
         title: 'Example',
-        // icon: 'el-icon-s-help'
-        icon: 'example'
+        // icon: MoreFilled
+        icon: Menu
       },
       children: [{
           path: 'table',
@@ -68,8 +73,8 @@ const router = createRouter({
           name: 'Tree',
           meta: {
             title: 'Tree',
-            // icon: 'tree'
-            icon: 'el-icon-s-help',
+            icon: 'tree'
+            // icon: MoreFilled,
           },
           component: () => import('@/views/tree.vue'),
         },

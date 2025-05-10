@@ -61,16 +61,19 @@
     }
 
     .el-menu-icon {
-      font-size:14px;
+      font-size: inherit; // el-menu-icon 的字体大小被element主题css设置为了18px 这里改为集成父元素字体大小 与svg-icon自定义svg保持一致
       width: 1em;
       height: 1em;
       margin-right: 16px;
+      transform: scale(1.2);// 由于element的icon其viewBox没有顶边，而自定义的svg都顶边了 so通过缩放来保持大小一致
+      
     }
 
     .el-menu {
       border: none;
       height: 100%;
       width: 100% !important;
+      // span{background:#966;}
     }
 
     // menu hover
@@ -87,7 +90,6 @@
 
     & .nest-menu .el-sub-menu>.el-sub-menu__title,
     & .el-sub-menu .el-menu-item {
-      
       min-width: v.$sideBarWidth !important;
       background-color: v.$subMenuBg !important;
 
@@ -127,8 +129,6 @@
       overflow: hidden;
 
       &>.el-sub-menu__title {
-        padding: 0 !important;
-
         .svg-icon {
           margin-left: 20px;
         }

@@ -1,18 +1,24 @@
 <template>
+  <!-- <i-ep-MoreFilled /> -->
+
   <div v-if="!item.hidden">
     <template v-if=" !alwaysShow && theOnlyOneChild && !theOnlyOneChild.children">
       <app-link :to="resolvePath(theOnlyOneChild.path)" v-if="theOnlyOneChild.meta">
         <el-menu-item :index="resolvePath(theOnlyOneChild.path)" class="submenu-title-noDropdown">
           <template v-if="theOnlyOneChild.meta.icon">
-            <el-icon class="el-menu-icon" v-if="theOnlyOneChild.meta.icon.includes('el-icon')">
-              <i-ep-MoreFilled />
+            <svg-icon
+              :icon="theOnlyOneChild.meta.icon"
+              v-if="typeof theOnlyOneChild.meta.icon === 'string'"
+            />
+            <el-icon class="el-menu-icon" v-else>
+              <component :is="theOnlyOneChild.meta.icon" />
             </el-icon>
-
-            <svg-icon :icon="theOnlyOneChild.meta.icon" v-else />
           </template>
           <template #title v-if="theOnlyOneChild.meta.title">
             <span>{{theOnlyOneChild.meta.title}}</span>
           </template>
+
+          <!-- <Item :icon="theOnlyOneChild.meta.icon" :title="1+theOnlyOneChild.meta.title" /> -->
         </el-menu-item>
       </app-link>
     </template>
@@ -20,15 +26,16 @@
     <el-sub-menu :index="resolvePath(item.path)" popper-append-to-body ref="subMenu" v-else>
       <template #title>
         <template v-if="item.meta.icon">
-          <el-icon class="el-menu-icon" v-if="item.meta.icon.includes('el-icon')">
-            <i-ep-MoreFilled />
+          <svg-icon :icon="item.meta.icon" v-if="typeof item.meta.icon === 'string'" />
+          <el-icon class="el-menu-icon" v-else>
+            <component :is="item.meta.icon" />
           </el-icon>
-
-          <svg-icon :icon="item.meta.icon" v-else />
         </template>
         <template v-if="item.meta.title">
           <span>{{item.meta.title}}</span>
         </template>
+
+        <!-- <Item :icon="item.meta.icon" :title="item.meta.title" /> -->
       </template>
       <sidebar-item
         :base-path="resolvePath(child.path)"
@@ -43,10 +50,11 @@
 </template>
 
 <script setup>
+import path from 'path-browserify-esm'
 import { ref, onMounted } from 'vue'
 import { isExternal } from '@/utils/validate'
 import AppLink from './Link.vue'
-import path from 'path-browserify-esm'
+// import Item from './Item'
 
 import { ctx } from '@/store'
 
