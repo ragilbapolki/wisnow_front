@@ -33,7 +33,7 @@ sass和sass-embedded都是同样的js api接口，sass全部用js实现，sass-e
 
 [综合对比后2个方案](https://npmpackage.info/)后，选择了`@spiriit/vite-plugin-svg-spritemap`，它文档完整，下载量更多，发布版本多。它的[文档](https://spiriitlabs.github.io/vite-plugin-svg-spritemap/)
 
-- 因为引入了element ui 所以尽量优先使用该框架的Icon图标。
+- 因为引入了element ui 所以尽量优先使用该框架的Icon图标，而且svg雪碧图会加载所有图片，而本项目里的element icon是按需加载的。
 
 ### 数据模拟方案：msw+faker
 

@@ -33,3 +33,9 @@ npm run build
 ```sh
 npm run lint
 ```
+
+### Run the build directory
+
+```sh
+http-server ./dist -c-1
+```
