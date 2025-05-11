@@ -80,6 +80,19 @@ const router = createRouter({
       ]
     },
     {
+      path: '/form',
+      component: Layout,
+      children: [{
+        path: 'index',
+        name: 'Form',
+        component: () => import('@/views/form.vue'),
+        meta: {
+          title: 'Form',
+          icon: 'form'
+        }
+      }]
+    },
+    {
       path: '/404',
       component: () => import('@/views/404.vue'),
       hidden: true
