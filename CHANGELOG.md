@@ -21,6 +21,8 @@
 ### 更新记录
 
 ...
+
+* (2025-05-12): 新增404页面
 * (2025-05-11): element plus icon的使用；vue-admin-template项目里移过来的代码改为Composition API写法
 * (2025-04-29): 基于vue provide 的全局srore管理
 * (2025-04-28): 完成登录页面 & svg雪碧图功能 & 数据模拟（msw+faker）；各页面登录验证功能
