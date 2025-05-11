@@ -1,27 +1,45 @@
 <template>
   <div class="app-container">
-    <el-input placeholder="Filter keyword" style="margin-bottom:30px;" v-model="filterText" />
+    <el-input
+      class="w-60 mb-2"
+      placeholder="Filter keyword"
+      style="margin-bottom:30px;"
+      v-model="filterText"
+    />
+
     <el-tree
-      :data="data2"
+      :data="data"
       :filter-node-method="filterNode"
       :props="defaultProps"
       class="filter-tree"
       default-expand-all
-      ref="tree2"
+      ref="treeRef"
+      style="max-width: 600px"
     />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 const filterText = ref('')
-const tree2 = ref()
-const defaultProps = reactive({
+const treeRef = ref()
+
+const defaultProps = {
     children: 'children',
     label: 'label',
+}
+
+watch(filterText, (val) => {
+    treeRef.value.filter(val)
 })
-const data2 = reactive([
+
+const filterNode = (value, data) => {
+    if (!value) return true
+    return data.label.includes(value)
+}
+
+const data = [
     {
         id: 1,
         label: 'Level one 1',
@@ -70,19 +88,5 @@ const data2 = reactive([
             },
         ],
     },
-])
-
-watch(
-    () => filterText.value,
-    (val) => {
-        console.log(tree2)
-        tree2.value.filter(val)
-    }
-)
-
-const filterNode = (value, data) => {
-    if (!value) return true
-    return data.label.indexOf(value) !== -1
-}
+]
 </script>
-
