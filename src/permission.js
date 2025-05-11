@@ -18,7 +18,10 @@ NProgress.configure({
 })
 
 // no redirect whitelist
-const whiteList = ['/account/login']
+const whiteList = [
+  '/account/login',
+  '/404'
+]
 
 router.beforeEach(async (to, from, next) => {
   // start progress bar

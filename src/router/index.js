@@ -6,13 +6,14 @@ import {
 
 import Layout from '@/layout/index.vue'
 import {
-  MoreFilled,
   HelpFilled,
   Menu,
 } from '@element-plus/icons-vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+
+
   routes: [{
       path: '/account/login',
       name: 'login',
@@ -56,7 +57,6 @@ const router = createRouter({
       meta: {
         alwaysShow: true,
         title: 'Example',
-        // icon: MoreFilled
         icon: Menu
       },
       children: [{
@@ -74,13 +74,21 @@ const router = createRouter({
           meta: {
             title: 'Tree',
             icon: 'tree'
-            // icon: MoreFilled,
           },
           component: () => import('@/views/tree.vue'),
         },
       ]
     },
-
+    {
+      path: '/404',
+      component: () => import('@/views/404.vue'),
+      hidden: true
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/404',
+      hidden: true
+    },
   ],
 })
 
