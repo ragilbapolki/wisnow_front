@@ -12,8 +12,6 @@ import {
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-
-
   routes: [{
       path: '/account/login',
       name: 'login',
@@ -152,6 +150,17 @@ const router = createRouter({
           }
         }
       ]
+    },
+    {
+      path: '/external-link',
+      component: Layout,
+      children: [{
+        path: 'https://github.com/chocho-1115/vue-admin',
+        meta: {
+          title: 'External Link',
+          icon: 'link'
+        }
+      }]
     },
     {
       path: '/404',
