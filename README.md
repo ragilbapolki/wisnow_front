@@ -1,41 +1,72 @@
-# vue-admin
+<p align="center">
+    <a href="https://github.com/Jackzyy/vue-elelment-admin" target="_blank">
+        <img src="https://cn.vuejs.org/images/logo.png" width="100">
+    </a>
+</p>
+<p align="center">
+    <a href="https://github.com/vuejs/vue">
+        <img src="https://img.shields.io/badge/vue-2.6.10-brightgreen.svg">
+    </a>
+    <a href="https://github.com/ElemeFE/element">
+        <img src="https://img.shields.io/badge/elemnet--ui-2.13.0-brightgreen.svg">
+    </a>
+    <a href="https://github.com/prettier/prettier">
+        <img src="https://img.shields.io/badge/code style-prettier-brightgreen.svg">
+    </a>
+    <a href="https://github.com/webpack/webpack">
+        <img src="https://img.shields.io/badge/webpack->=4.0.0-brightgreen.svg">
+    </a>
+    <a href="https://github.com/easy-mock/easy-mock">
+        <img src="https://img.shields.io/badge/data-easyMock-brightgreen.svg">
+    </a>
+  	<a href="https://github.com/Jackzyy/vue-elelment-admin">
+        <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg">
+    </a>
+</p>
 
-This template should help get you started developing with Vue 3 in Vite.
+## 简介
 
-## Recommended IDE Setup
+本项目旨在提供一个功能极简的 vue admin 管理后台，只提供一些搭建后台必要的依赖和功能。
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+之所以想要从零开始搭建它，是因为我并没有发现符合上述初衷的项目。如果你有好的推荐❤️，可以把它介绍给我。
 
-## Customize configuration
+在这个过程中发现[vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)尽管不是使用最新的vue搭建的，但是其功能很符合预期，所以本项目前期参考了该项目。
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+[vue-admin](https://github.com/chocho-1115/vue-admin) 是一个后台管理 spa 页面，它基于 [vue](https://vuejs.org/) 和 [element-plus](https://element-plus.org/zh-CN/) 采用了最新的前端技术栈，实现了登录权限验证，并使用 [fakerjs](https://fakerjs.dev/)+[mswjs](https://mswjs.io/) 来模拟请求数据。
 
-## Project Setup
+**目前基于 `vite 6.x` 和 `create-vue 3.x` 版本构建，建议 [Node.js](https://nodejs.org/) 使用较新版本。**
 
-```sh
+
+## 🎉 特性
+
+> 本项目涉及的技术栈主要有 [ES6](http://es6.ruanyifeng.com/) 、[vue](https://vuejs.org/) 、[vue-router](https://router.vuejs.org/) 、[axios](http://www.axios-js.com/) 、[vite](https://vite.dev/) 、[element-plus](https://element-plus.org/zh-CN/) 、[fakerjs](https://fakerjs.dev/)+[mswjs](https://mswjs.io/) ,所以你最好提前熟悉了解这些知识，这将对你认识学习该项目有很大帮助
+
+
+项目使用[create-vue](https://github.com/vuejs/create-vue)从零开始搭建，集成了一下技术栈：
+
+- 💪 vue3 + vite6
+- 💅 element plus
+- 🌍 msw + faker
+- 👏 自定义icon使用svg雪碧图
+- 🥳 sass
+- 🚀 待定
+- 📦️ 待定
+
+
+## 快速开始
+
+### 安装
+
+```
+# 克隆项目
+git clone https://github.com/chocho-1115/vue-admin.git
+
+# 进入项目目录
+cd vue-admin
+
+# 安装依赖
 npm install
-```
 
-### Compile and Hot-Reload for Development
-
-```sh
+# 启动服务
 npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
-
-### Run the build directory
-
-```sh
-http-server ./dist -c-1
 ```
