@@ -29,31 +29,27 @@
 
 ## 简介
 
-本项目旨在提供一个功能极简的 vue admin 管理后台，只提供一些搭建后台必要的依赖和功能。
+本项目旨在提供一个使用最新技术、ui极简、轻量级的 vue admin 管理后台，它只提供一些搭建后台必要的依赖和功能。
 
-之所以想要从零开始搭建它，是因为我并没有发现符合上述初衷的项目。如果你有好的推荐❤️，可以把它介绍给我。
-
-在这个过程中发现[vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)尽管不是使用最新的vue搭建的，但是其功能很符合预期，所以本项目前期参考了该项目。
+之所以想要从零开始搭建它，是因为我并没有寻找到符合上述初衷的方案。如果你有好的推荐❤️，可以把它介绍给我。在这个寻找的过程中发现[vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)尽管不是使用最新技术栈搭建的，但是其功能很符合预期，所以本项目前期参考了它。
 
 [vue-admin](https://github.com/chocho-1115/vue-admin) 是一个后台管理 spa 页面，它基于 [vue](https://vuejs.org/) 和 [element-plus](https://element-plus.org/zh-CN/) 采用了最新的前端技术栈，实现了登录权限验证，并使用 [fakerjs](https://fakerjs.dev/)+[mswjs](https://mswjs.io/) 来模拟请求数据。
 
-**目前基于 `vite 6.x` 和 `create-vue 3.x` 版本构建，建议 [Node.js](https://nodejs.org/) 使用较新版本。**
 
+## 🎉 技术栈
 
-## 🎉 特性
+**项目使用[create-vue 3.x](https://github.com/vuejs/create-vue)从零开始创建，基于 `vite 6.x` 进行版本构建，建议 [Node.js](https://nodejs.org/) 使用较新版本。**
 
-> 本项目涉及的技术栈主要有 [ES6](http://es6.ruanyifeng.com/) 、[vue](https://vuejs.org/) 、[vue-router](https://router.vuejs.org/) 、[axios](http://www.axios-js.com/) 、[vite](https://vite.dev/) 、[element-plus](https://element-plus.org/zh-CN/) 、[fakerjs](https://fakerjs.dev/)+[mswjs](https://mswjs.io/) ,所以你最好提前熟悉了解这些知识，这将对你认识学习该项目有很大帮助
+主要集成了以下技术栈：
 
-
-项目使用[create-vue](https://github.com/vuejs/create-vue)从零开始搭建，集成了一下技术栈：
-
-- 💪 vue3 + vite6
-- 💅 element plus
-- 🌍 msw + faker
-- 👏 自定义icon使用svg雪碧图
-- 🥳 sass
-- 🚀 待定
-- 📦️ 待定
+- 💪 [vue3](https://vuejs.org/) + [vite6](https://vite.dev/)
+- 💅 [vue-router](https://router.vuejs.org/)
+- 💅 [element plus](https://element-plus.org/zh-CN/)
+- 🌍 [mswjs](https://mswjs.io/) + [fakerjs](https://fakerjs.dev/)
+- 👏 [axios](http://www.axios-js.com/)
+- 🥳 [sass](https://sass-lang.com/)
+- 🚀 [ES6](http://es6.ruanyifeng.com/)
+- 📦️ 自定义icon使用svg雪碧图（建议优先使用element icon）
 
 
 ## 快速开始
