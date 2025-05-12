@@ -4,23 +4,20 @@
     </a>
 </p>
 <p align="center">
-    <a href="https://github.com/vuejs/vue">
-        <img src="https://img.shields.io/badge/vue-2.6.10-brightgreen.svg">
+    <a href="https://github.com/vitejs/vite">
+        <img src="https://img.shields.io/badge/vite->=6.2.4-brightgreen.svg">
     </a>
-    <a href="https://github.com/ElemeFE/element">
-        <img src="https://img.shields.io/badge/elemnet--ui-2.13.0-brightgreen.svg">
+    <a href="https://github.com/vuejs/core">
+        <img src="https://img.shields.io/badge/vue-3.5.13-brightgreen.svg">
     </a>
-    <a href="https://github.com/prettier/prettier">
-        <img src="https://img.shields.io/badge/code style-prettier-brightgreen.svg">
+    <a href="https://github.com/element-plus/element-plus">
+        <img src="https://img.shields.io/badge/elemnet--plus-2.9.9-brightgreen.svg">
     </a>
-    <a href="https://github.com/webpack/webpack">
-        <img src="https://img.shields.io/badge/webpack->=4.0.0-brightgreen.svg">
+    <a href="https://github.com/mswjs/msw">
+        <img src="https://img.shields.io/badge/msw-2.7.5-brightgreen.svg">
     </a>
-    <a href="https://github.com/easy-mock/easy-mock">
-        <img src="https://img.shields.io/badge/data-easyMock-brightgreen.svg">
-    </a>
-  	<a href="https://github.com/Jackzyy/vue-elelment-admin">
-        <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg">
+    <a href="https://github.com/faker-js/faker">
+        <img src="https://img.shields.io/badge/faker-9.7.0-brightgreen.svg">
     </a>
 </p>
 
