@@ -69,3 +69,9 @@ npm install
 # 启动服务
 npm run dev
 ```
+
+## License
+
+[MIT](https://github.com/chocho-1115/vue-admin/blob/main/LICENSE)
+
+Copyright (c) 2025 chocho-1115
