@@ -27,9 +27,9 @@
       transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
     }
 
-    .scrollbar-wrapper {
-      overflow-x: hidden !important;
-    }
+    // .scrollbar-wrapper {
+    //   overflow-x: hidden !important;
+    // }
 
     .el-scrollbar__bar.is-vertical {
       right: 0px;
@@ -108,35 +108,10 @@
       margin-left: 54px;
     }
 
-    .sub-menu-title-noDropdown {
-      padding: 0 !important;
-      position: relative;
-
-      .el-tooltip {
-        padding: 0 !important;
-
-        .svg-icon {
-          margin-left: 20px;
-        }
-
-        .sub-el-icon {
-          margin-left: 19px;
-        }
-      }
-    }
-
     .el-sub-menu {
-      overflow: hidden;
+      // overflow: hidden;
 
       &>.el-sub-menu__title {
-        .svg-icon {
-          margin-left: 20px;
-        }
-
-        .sub-el-icon {
-          margin-left: 19px;
-        }
-
         .el-sub-menu__icon-arrow {
           display: none;
         }
@@ -214,7 +189,6 @@
   // the scroll bar appears when the sub-menu is too long
   >.el-menu--popup {
     max-height: 100vh;
-    overflow-y: auto;
 
     &::-webkit-scrollbar-track-piece {
       background: #d3dce6;
