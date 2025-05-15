@@ -104,7 +104,8 @@ const router = createRouter({
           component: () => import('@/views/nested/menu1/index.vue'), // Parent router-view
           name: 'Menu1',
           meta: {
-            title: 'Menu1'
+            title: 'Menu1',
+            icon: HelpFilled,
           },
           children: [{
               path: 'menu1-1',
@@ -146,7 +147,8 @@ const router = createRouter({
           component: () => import('@/views/nested/menu2.vue'),
           name: 'Menu2',
           meta: {
-            title: 'menu2'
+            title: 'menu2',
+            icon: 'nested',
           }
         }
       ]
