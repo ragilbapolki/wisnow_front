@@ -21,40 +21,7 @@
     left: 0;
     z-index: 1001;
     overflow: hidden;
-
-    // reset element-ui css
-    .horizontal-collapse-transition {
-      transition: 0s width ease-in-out, 0s padding-left ease-in-out, 0s padding-right ease-in-out;
-    }
-
-    // .scrollbar-wrapper {
-    //   overflow-x: hidden !important;
-    // }
-
-    .el-scrollbar__bar.is-vertical {
-      right: 0px;
-    }
-
-    .el-scrollbar {
-      height: 100%;
-    }
-
-    &.has-logo {
-      .el-scrollbar {
-        height: calc(100% - 50px);
-      }
-    }
-
-    .is-horizontal {
-      display: none;
-    }
-
-    a {
-      display: inline-block;
-      width: 100%;
-      overflow: hidden;
-    }
-
+    
     .svg-icon {
       flex-shrink: 0;
       margin-right: 16px;
@@ -66,14 +33,10 @@
       height: 1em;
       margin-right: 16px;
       transform: scale(1.2);// 由于element的icon其viewBox没有顶边，而自定义的svg都顶边了 so通过缩放来保持大小一致
-      
     }
 
     .el-menu {
       border: none;
-      height: 100%;
-      width: 100% !important;
-      // span{background:#966;}
     }
 
     // menu hover
@@ -90,9 +53,7 @@
 
     & .nest-menu .el-sub-menu>.el-sub-menu__title,
     & .el-sub-menu .el-menu-item {
-      min-width: v.$sideBarWidth !important;
       background-color: v.$subMenuBg !important;
-
       &:hover {
         background-color: v.$subMenuHover !important;
       }
@@ -103,38 +64,22 @@
     .sidebar-container {
       width: 54px !important;
     }
-
     .main-container {
       margin-left: 54px;
     }
-
-    .el-sub-menu {
-      // overflow: hidden;
-
-      &>.el-sub-menu__title {
-        .el-sub-menu__icon-arrow {
+    .el-sub-menu__icon-arrow {
           display: none;
-        }
-      }
     }
-
     .el-menu--collapse {
-      .el-sub-menu {
-        &>.el-sub-menu__title {
+      width: auto;
+    }
+    .el-menu--collapse {
+      .el-sub-menu__title {
           &>span {
-            height: 0;
-            width: 0;
-            overflow: hidden;
-            visibility: hidden;
-            display: inline-block;
+            display:none
           }
-        }
       }
     }
-  }
-
-  .el-menu--collapse .el-menu .el-sub-menu {
-    min-width: v.$sideBarWidth !important;
   }
 
   // mobile responsive
@@ -158,7 +103,6 @@
   }
 
   .withoutAnimation {
-
     .main-container,
     .sidebar-container {
       transition: none;
@@ -168,39 +112,14 @@
 
 // when menu collapsed
 .el-menu--vertical {
-  &>.el-menu {
+  .el-menu {
     .svg-icon {
-      margin-right: 16px;
+      margin-right: 5px;
     }
-    .sub-el-icon {
-      margin-right: 12px;
-      margin-left: -2px;
-    }
-  }
-
-  .nest-menu .el-sub-menu>.el-sub-menu__title,
-  .el-menu-item {
-    &:hover {
-      // you can use v.$submenuHover
-      background-color: v.$menuHover !important;
-    }
-  }
-
-  // the scroll bar appears when the sub-menu is too long
-  >.el-menu--popup {
-    max-height: 100vh;
-
-    &::-webkit-scrollbar-track-piece {
-      background: #d3dce6;
-    }
-
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: #99a9bf;
-      border-radius: 20px;
+    .el-menu-icon {
+      font-size: inherit; // el-menu-icon 的字体大小被element主题css设置为了18px 这里改为集成父元素字体大小 与svg-icon自定义svg保持一致
+      width:1em;
+      transform: scale(1.2);// 由于element的icon其viewBox没有顶边，而自定义的svg都顶边了 so通过缩放来保持大小一致
     }
   }
 }

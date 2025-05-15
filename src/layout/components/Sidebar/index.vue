@@ -1,7 +1,7 @@
 <template>
   <div :class="{'has-logo':showLogo}">
     <logo :collapse="isCollapse" v-if="showLogo" />
-    <el-scrollbar wrap-class="scrollbar-wrapper">
+    <el-scrollbar :height="showLogo ?  'calc(100% - 50px)' : '100%'">
       <el-menu
         :active-text-color="variables.menuActiveText"
         :background-color="variables.menuBg"
