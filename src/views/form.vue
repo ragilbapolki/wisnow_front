@@ -1,5 +1,16 @@
 <template>
   <div class="app-container">
+    <p>
+      The following example is from
+      <a
+        href="https://element-plus.org/zh-CN/component/form.html#典型表单"
+        target="_blank"
+      >
+        <el-text type="primary">element plus</el-text>
+      </a>
+    </p>
+    <el-divider />
+
     <el-form :model="form" style="max-width: 600px;">
       <el-form-item label="Activity name">
         <el-input v-model="form.name" />

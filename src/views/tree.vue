@@ -1,5 +1,16 @@
 <template>
   <div class="app-container">
+    <p>
+      The following example is from
+      <a
+        href="https://element-plus.org/zh-CN/component/tree.html#树节点过滤"
+        target="_blank"
+      >
+        <el-text type="primary">element plus</el-text>
+      </a>
+    </p>
+    <el-divider />
+
     <el-input
       class="w-60 mb-2"
       placeholder="Filter keyword"

@@ -22,7 +22,7 @@ const props = defineProps({
     },
 })
 const title = ref('Vue Admin')
-const logo = ref('https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png')
+const logo = ref('https://cn.vuejs.org/images/logo.png')
 </script>
 
 <style lang="scss" scoped>
