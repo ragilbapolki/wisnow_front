@@ -5,13 +5,14 @@
       @toggleClick="toggleSidebar"
       class="hamburger-container"
     />
-
     <breadcrumb class="breadcrumb-container" />
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img :src="ctx.userInfo.avatar+'?imageView2/1/w/80/h/80'" class="user-avatar" />
-          <i class="el-icon-caret-bottom" />
+          <el-icon class="el-icon-caret-bottom">
+            <i-ep-MoreFilled />
+          </el-icon>
         </div>
         <template v-slot:dropdown>
           <el-dropdown-menu class="user-dropdown">

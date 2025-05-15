@@ -48,12 +48,15 @@ export default defineConfig({
         ElementPlusResolver(),
         // 自动注册图标组件
         IconsResolver({
-          enabledCollections: ['ep'],
+          // prefix: 'i', // 默认：'i' 使用： {prefix}-{collection}-{icon}
+          enabledCollections: [
+            'ep'
+          ],
         }),
       ],
     }),
     Icons({
-      autoInstall: true, // 自动安装了 @iconify-json/ep
+      autoInstall: true, // 自动安装了 enabledCollections 指定的图标 如@iconify-json/ep
     }),
   ],
   resolve: {

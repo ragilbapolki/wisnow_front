@@ -49,7 +49,7 @@
 - 👏 [axios](http://www.axios-js.com/)
 - 🥳 [sass](https://sass-lang.com/)
 - 🚀 [ES6](http://es6.ruanyifeng.com/)
-- 📦️ 自定义icon使用svg雪碧图（建议优先使用element icon）
+- 📦️ [element plus icon](https://icon-sets.iconify.design/ep/) + 自定义svg icon雪碧图（建议优先使用element plus icon）
 
 
 ## 快速开始
