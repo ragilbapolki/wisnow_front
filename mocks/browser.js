@@ -1,10 +1,7 @@
 import {
   setupWorker
 } from 'msw/browser'
-import {
-  handlers
-} from './handlers';
-
+import handlers from './handlers';
 const worker = new setupWorker();
 worker.use(...handlers)
 // worker.events.on('request:start', ({
