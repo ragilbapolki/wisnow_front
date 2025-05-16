@@ -5,17 +5,15 @@
 
 ...
 * svgo
-* mocks公共代码的封装
 * 提供demo
-* 新增Form页面
-* 新增Nested页面
 
 ### 更新记录
 
 ...
+* (2025-05-16): mocks公共代码的封装
 * (2025-05-12): 新增nested页面
 * (2025-05-12): 新增404页面
-* (2025-05-11): element plus icon的使用；vue-admin-template项目里移过来的代码改为Composition API写法
+* (2025-05-11): 新增Form页面；element plus icon的使用；vue-admin-template项目里移过来的代码改为Composition API写法
 * (2025-04-29): 基于vue provide 的全局srore管理
 * (2025-04-28): 完成登录页面 & svg雪碧图功能 & 数据模拟（msw+faker）；各页面登录验证功能
 * (2025-04-23): 引入axios、element-plus，采用按需导入引入的方式

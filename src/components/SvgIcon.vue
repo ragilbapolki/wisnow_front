@@ -1,7 +1,7 @@
 <template>
   <div :style="styleExternalIcon" class="svg-external-icon svg-icon" v-if="isExternal" />
   <svg :class="svgClass" aria-hidden="true" v-else>
-    <use :href="`#sprite-${icon}`" class="use" />
+    <use :href="`/__spritemap#sprite-${icon}`" class="use" />
   </svg>
 </template>
 

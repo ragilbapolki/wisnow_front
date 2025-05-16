@@ -1,7 +1,6 @@
 import {
-  http,
-  HttpResponse
-} from 'msw'
+  response
+} from './response.js'
 // import { faker } from "@faker-js/faker/locale/zh_CN";
 import {
   faker
@@ -9,15 +8,10 @@ import {
 
 import {
   users
-} from './my'
+} from './config.js'
 import {
   formatDate
 } from '@/utils'
-
-
-
-
-
 
 function createRandomUser() {
   return {
@@ -47,9 +41,10 @@ const list = faker.helpers.multiple(createRandomUser, {
   count: 30,
 });
 
-export default [
-
-  http.get('/dev-api/table/list', async ({
+export default [{
+  path: '/table/list',
+  type: 'get',
+  handler: async ({
     request
   }) => {
     const token = request.headers.get('token')
@@ -57,47 +52,16 @@ export default [
 
     // mock error
     if (!info) {
-      return HttpResponse.json({
-        code: 50008,
-        message: 'Login failed, unable to get user details.'
+      return response({
+        status: -1,
       })
     }
 
-    return HttpResponse.json({
-      code: 20000,
+    return response({
       body: {
         items: list,
         total: list.length,
       }
     })
-  }),
-]
-
-
-// const data = Mock.mock({
-//   'items|30': [{
-//     id: '@id',
-//     title: '@sentence(10, 20)',
-//     'status|1': ['published', 'draft', 'deleted'],
-//     author: 'name',
-//     display_time: '@datetime',
-//     pageviews: '@integer(300, 5000)'
-//   }]
-// })
-
-// module.exports = [
-//   {
-//     url: '/vue-admin-template/table/list',
-//     type: 'get',
-//     response: config => {
-//       const items = data.items
-//       return {
-//         code: 20000,
-//         data: {
-//           total: items.length,
-//           items: items
-//         }
-//       }
-//     }
-//   }
-// ]
+  }
+}, ]
