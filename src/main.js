@@ -11,6 +11,7 @@ import SvgIcon from './components/SvgIcon.vue'
 import {
   ctx
 } from './store'
+import './permission'
 
 async function enableMocking() {
   if (import.meta.env.MODE !== 'development') {
@@ -32,7 +33,7 @@ async function enableMocking() {
     // filter warnings
     onUnhandledRequest(request, print) {
       const url = new URL(request.url)
-      if (url.pathname.includes('/prod-api') || url.pathname.includes('/dev-api')) {
+      if (url.pathname.includes('/dev-api')) {
         print.warning()
       }
       return
@@ -40,12 +41,15 @@ async function enableMocking() {
   })
 }
 
+
+
+
+
 enableMocking().then(async () => {
-  await import('@/permission')
+  // await import('@/permission')
 
   const app = createApp(App)
-
-  app.use(router)
+  app.use(router) // It must be after the enablemock function
 
   app.provide('context', ctx)
   app.component('svg-icon', SvgIcon)

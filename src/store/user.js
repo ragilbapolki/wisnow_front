@@ -25,9 +25,3 @@ export default {
   },
 
 }
-
-
-// removeToken() // must remove  token  first
-//         resetRouter()
-//         commit('RESET_STATE')
-//         resolve()
