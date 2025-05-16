@@ -1,6 +1,7 @@
 import {
   createRouter,
   createWebHistory
+  // createWebHashHistory
 } from 'vue-router'
 // import HomeView from '../views/HomeView.vue'
 
@@ -37,7 +38,7 @@ const router = createRouter({
       path: '/about',
       component: Layout,
       children: [{
-        path: 'about',
+        path: 'index',
         name: 'About',
         component: () => import('@/views/AboutView.vue'),
         meta: {
