@@ -8,8 +8,10 @@ worker.use(...handlers)
 //   requestId,
 //   request
 // }) => {
-//   console.log('Outgoing:', request.method, request.url, requestId)
-//   return false
+//   const url = new URL(request.url)
+//   if (url.pathname.includes('/dev-api')) {
+//     console.log('Outgoing:', request.method, request.url, requestId)
+//   }
 // })
 export {
   worker
