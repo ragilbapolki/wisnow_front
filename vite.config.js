@@ -26,6 +26,7 @@ import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     // svg 雪碧图
     VitePluginSvgSpritemap('./src/icons/svg/*.svg', {
