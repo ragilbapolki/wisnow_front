@@ -27,13 +27,15 @@ import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    VitePluginSvgSpritemap('./src/icons/svg/*.svg', { //  // 暂未接入svgo
-      injectSvgOnDev: true,
+    // svg 雪碧图
+    VitePluginSvgSpritemap('./src/icons/svg/*.svg', {
+      // injectSvgOnDev: true,
     }),
     vue(),
     vueDevTools(),
     AutoImport({
       resolvers: [
+        // 自动导入 element plus 相关函数 如ElMessage
         ElementPlusResolver(),
         // Auto import icon components
         // 自动导入图标组件
@@ -45,8 +47,9 @@ export default defineConfig({
     }),
     Components({
       resolvers: [
+        // 自动导入 element plus 组件
         ElementPlusResolver(),
-        // 自动注册图标组件
+        // 自动注册图标组件@iconify-json/ep
         IconsResolver({
           // prefix: 'i', // 默认：'i' 使用： {prefix}-{collection}-{icon}
           enabledCollections: [
