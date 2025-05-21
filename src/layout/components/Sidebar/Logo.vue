@@ -1,11 +1,11 @@
 <template>
   <div :class="{'collapse': props.collapse}" class="sidebar-logo-container">
     <transition name="sidebarLogoFade">
-      <router-link class="sidebar-logo-link" key="collapse" to="/" v-if="props.collapse">
+      <router-link to="/" v-if="props.collapse">
         <img :src="logo" class="sidebar-logo" v-if="logo" />
         <h1 class="sidebar-title" v-else>{{ title }}</h1>
       </router-link>
-      <router-link class="sidebar-logo-link" key="expand" to="/" v-else>
+      <router-link to="/" v-else>
         <img :src="logo" class="sidebar-logo" v-if="logo" />
         <h1 class="sidebar-title">{{ title }}</h1>
       </router-link>
@@ -44,27 +44,22 @@ const logo = ref('https://cn.vuejs.org/images/logo.png')
     text-align: center;
     overflow: hidden;
 
-    & .sidebar-logo-link {
-        height: 100%;
-        width: 100%;
+    .sidebar-logo {
+        width: 32px;
+        height: 32px;
+        vertical-align: middle;
+        margin-right: 12px;
+    }
 
-        & .sidebar-logo {
-            width: 32px;
-            height: 32px;
-            vertical-align: middle;
-            margin-right: 12px;
-        }
-
-        & .sidebar-title {
-            display: inline-block;
-            margin: 0;
-            color: #fff;
-            font-weight: 600;
-            line-height: 50px;
-            font-size: 14px;
-            font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
-            vertical-align: middle;
-        }
+    .sidebar-title {
+        display: inline-block;
+        margin: 0;
+        color: #fff;
+        font-weight: 600;
+        line-height: 50px;
+        font-size: 14px;
+        font-family: Avenir, Helvetica Neue, Arial, Helvetica, sans-serif;
+        vertical-align: middle;
     }
 
     &.collapse {

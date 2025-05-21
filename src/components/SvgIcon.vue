@@ -8,6 +8,7 @@
 <script setup>
 // doc: https://panjiachen.github.io/vue-element-admin-site/feature/component/svg-icon.html#usage
 import { computed } from 'vue'
+import { isExternal as isExt } from '@/utils/validate'
 
 const props = defineProps({
     icon: {
@@ -21,7 +22,7 @@ const props = defineProps({
     },
 })
 const isExternal = computed(() => {
-    return /^(https?:|mailto:|tel:)/.test(props.icon)
+    return isExt(props.icon)
 })
 const svgClass = computed(() => {
     if (props.className) {
