@@ -2,11 +2,11 @@
   <div :class="{'collapse': props.collapse}" class="sidebar-logo-container">
     <transition name="sidebarLogoFade">
       <router-link to="/" v-if="props.collapse">
-        <img :src="logo" class="sidebar-logo" v-if="logo" />
+        <img class="sidebar-logo" src="@/assets/logo.svg" v-if="showLogo" />
         <h1 class="sidebar-title" v-else>{{ title }}</h1>
       </router-link>
       <router-link to="/" v-else>
-        <img :src="logo" class="sidebar-logo" v-if="logo" />
+        <img class="sidebar-logo" src="@/assets/logo.svg" v-if="showLogo" />
         <h1 class="sidebar-title">{{ title }}</h1>
       </router-link>
     </transition>
@@ -22,7 +22,7 @@ const props = defineProps({
     },
 })
 const title = ref('Vue Admin')
-const logo = ref('https://cn.vuejs.org/images/logo.png')
+const showLogo = ref(true)
 </script>
 
 <style lang="scss" scoped>
