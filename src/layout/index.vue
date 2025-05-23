@@ -5,12 +5,13 @@
       class="drawer-bg"
       v-if="ctx.device==='mobile'&&ctx.sidebar.opened"
     />
-    <sidebar class="sidebar-container" />
-    <div class="main-container">
+    <Sidebar class="sidebar-container" />
+    <div :class="{hasTagsView:needTagsView}" class="main-container">
       <div :class="{'fixed-header': fixedHeader}">
         <Navbar />
+        <!-- <TagsView v-if="needTagsView" /> -->
       </div>
-      <app-main />
+      <AppMain />
     </div>
   </div>
 </template>
@@ -18,15 +19,12 @@
 <script setup>
 import { onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
-
-import Navbar from './components/Navbar.vue'
-import Sidebar from './components/Sidebar/index.vue'
-import AppMain from './components/AppMain.vue'
-
+import { Sidebar, Navbar, AppMain, TagsView } from './components'
 import { isMobile, resizeHandler } from './mixin/ResizeHandler'
 import { sctx, ctx, dispatch } from '@/store'
 
 const route = useRoute()
+const needTagsView = sctx.tagsView
 
 watch(
     () => route.path,
