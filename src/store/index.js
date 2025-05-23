@@ -1,11 +1,15 @@
 import context from './context'
 import staticContext from './static'
-import sidebar from './sidebar'
-import user from './user'
+import {
+  dispatch as sidebarDispatch
+} from './modules/sidebar'
+import {
+  dispatch as userDispatch
+} from './modules/user'
 
 export const dispatch = {
-  sidebar,
-  user
+  sidebar: sidebarDispatch,
+  user: userDispatch
 }
 
 export const ctx = context

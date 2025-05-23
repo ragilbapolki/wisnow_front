@@ -2,14 +2,17 @@ import {
   getToken,
   setToken,
   removeToken
-} from './storage'
+} from '../storage'
 import {
   resetRouter
 } from '@/router'
 
-import context from './context'
+export const state = {
+  // name: '',
+  // avatar: ''
+}
 
-export default {
+export const dispatch = {
   getToken,
   setToken,
   removeToken,
@@ -17,11 +20,12 @@ export default {
   removeInfo() {
     removeToken() // must remove  token  first
     resetRouter() // 防止后退上一页跳到需要登录的页面
-    context.userInfo = {}
+    Object.keys(state).forEach(key => delete state[key]);
+
   },
 
   saveInfo(data) {
-    context.userInfo = data
+    Object.assign(state, data)
   },
 
 }

@@ -1,19 +1,18 @@
 import {
   reactive,
 } from 'vue'
+
+
 import {
-  getSidebarStatus
-} from './storage'
+  state as userState
+} from './modules/user'
+
+import {
+  state as sidebarState
+} from './modules/sidebar'
 
 export default reactive({
-  userInfo: {
-    name: '',
-    avatar: ''
-  },
-  sidebar: {
-    opened: getSidebarStatus(),
-    withoutAnimation: false
-  },
+  userInfo: userState,
+  sidebar: sidebarState,
   device: 'desktop',
-
 })
