@@ -2,7 +2,6 @@ import {
   reactive,
 } from 'vue'
 
-
 import {
   state as userState
 } from './modules/user'
@@ -12,7 +11,7 @@ import {
 } from './modules/sidebar'
 
 export default reactive({
+  device: 'desktop',
   userInfo: userState,
   sidebar: sidebarState,
-  device: 'desktop',
 })

@@ -11,7 +11,6 @@ export const state = {
   // name: '',
   // avatar: ''
 }
-
 export const dispatch = {
   getToken,
   setToken,

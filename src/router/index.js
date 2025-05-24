@@ -11,12 +11,12 @@ import Layout from '@/layout/index.vue'
 import {
   HelpFilled,
   Menu,
+  MessageBox
 } from '@element-plus/icons-vue'
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL),
   routes: [
-    nestedRouter,
+
     {
       path: '/account/login',
       name: 'login',
@@ -34,6 +34,21 @@ const router = createRouter({
         meta: {
           title: 'Dashboard',
           icon: 'dashboard',
+          keepAlive: true
+        }
+      }, ]
+    },
+    {
+      path: '/store',
+      component: Layout,
+      redirect: '/store',
+      children: [{
+        path: 'index',
+        name: 'Store',
+        component: () => import('@/views/store.vue'),
+        meta: {
+          title: 'Store',
+          icon: MessageBox,
           keepAlive: true
         }
       }, ]
@@ -95,7 +110,7 @@ const router = createRouter({
         }
       }]
     },
-
+    nestedRouter,
     {
       path: '/external-link',
       component: Layout,
