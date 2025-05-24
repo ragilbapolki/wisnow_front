@@ -5,7 +5,8 @@
 </template>
 
 <script setup>
-import { ctx } from '@/store'
+import { inject } from 'vue'
+const ctx = inject('context')
 </script>
 
 <style lang="scss" scoped>

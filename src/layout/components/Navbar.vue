@@ -36,13 +36,16 @@
 </template>
 
 <script setup>
+import { inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import Hamburger from '@/components/Hamburger.vue'
 
 import { logout } from '@/api/user'
-import { ctx, dispatch } from '@/store'
+import { dispatch } from '@/store'
+
+const ctx = inject('context')
 
 const router = useRouter()
 const route = useRoute()

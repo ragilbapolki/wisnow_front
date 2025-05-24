@@ -24,14 +24,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 // import { onBeforeRouteUpdate } from 'vue-router'
 
-import { sctx, ctx } from '@/store'
+import { sctx } from '@/store'
 import variables from '@/styles/variables.module.scss'
 import Logo from './Logo.vue'
 import SidebarItem from './SidebarItem.vue'
+
+const ctx = inject('context')
 
 const routes = useRouter().options.routes
 const route = useRoute()

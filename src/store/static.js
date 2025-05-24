@@ -1,4 +1,4 @@
-export default {
+export default Object.freeze({
   /**
    * @type {boolean} true | false
    * @description Whether fix the header
@@ -10,4 +10,4 @@ export default {
    * @description Whether show the logo in sidebar
    */
   sidebarLogo: true
-}
+})

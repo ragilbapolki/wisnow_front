@@ -51,12 +51,12 @@
 
 <script setup>
 import path from 'path-browserify-esm'
-import { ref, onMounted } from 'vue'
+import { inject, ref, onMounted } from 'vue'
 import { isExternal } from '@/utils/validate'
 import AppLink from './Link.vue'
 // import Item from './Item'
 
-import { ctx } from '@/store'
+const ctx = inject('context')
 
 const props = defineProps({
     item: {

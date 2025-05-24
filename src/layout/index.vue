@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, computed, watch } from 'vue'
+import { inject, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import Navbar from './components/Navbar.vue'
@@ -24,7 +24,9 @@ import Sidebar from './components/Sidebar/index.vue'
 import AppMain from './components/AppMain.vue'
 
 import { isMobile, resizeHandler } from './mixin/ResizeHandler'
-import { sctx, ctx, dispatch } from '@/store'
+import { sctx, dispatch } from '@/store'
+
+const ctx = inject('context')
 
 const route = useRoute()
 
