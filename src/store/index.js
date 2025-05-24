@@ -1,15 +1,19 @@
 import context from './context'
 import staticContext from './static'
 import {
+  dispatch as userDispatch
+} from './modules/user'
+import {
   dispatch as sidebarDispatch
 } from './modules/sidebar'
 import {
-  dispatch as userDispatch
-} from './modules/user'
+  dispatch as tagsViewDispatch
+} from './modules/tagsView'
 
 export const dispatch = {
+  user: userDispatch,
   sidebar: sidebarDispatch,
-  user: userDispatch
+  tagsView: tagsViewDispatch,
 }
 
 export const ctx = context

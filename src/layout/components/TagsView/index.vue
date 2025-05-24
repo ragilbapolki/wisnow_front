@@ -1,7 +1,7 @@
 <template>
   <div class="tags-view-container" id="tags-view-container">
     <scroll-pane @scroll="handleScroll" class="tags-view-wrapper" ref="scrollPane">
-      <router-link
+      <!-- <router-link
         :class="isActive(tag)?'active':''"
         :key="tag.path"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
@@ -10,7 +10,7 @@
         class="tags-view-item"
         ref="tag"
         tag="span"
-        v-for="tag in visitedViews"
+        v-for="tag in context.tagsView"
       >
         {{ tag.title }}
         <span
@@ -18,7 +18,10 @@
           class="el-icon-close"
           v-if="!isAffix(tag)"
         />
-      </router-link>
+      </router-link>-->
+      <div :key="tag.path" v-for="tag in ctx.tagsView">{{tag.title}}2</div>
+      {{ctx.tagsView.length}}
+      <!-- {{context.tagsView.length}} -->
     </scroll-pane>
     <ul
       :style="{left: menu.left+'px',top: menu.top+'px'}"
@@ -33,14 +36,16 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, computed, watch, onMounted } from 'vue'
+import { ref, reactive, inject, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import path from 'path'
+import path from 'path-browserify-esm'
 
 import ScrollPane from './ScrollPane.vue'
 
 import { sctx, ctx, dispatch } from '@/store'
 
+// const context = inject('context')
+// console.log(3)
 const router = useRouter()
 const route = useRoute()
 
@@ -54,11 +59,11 @@ const visitedViews = reactive([])
 const selectedTag = {}
 let affixTags = []
 
-console.log('====>router')
-console.log(router)
+// console.log('====>router')
+// console.log(router)
 
-console.log('====>route')
-console.log(route)
+// console.log('====>route')
+// console.log({ ...route })
 
 // computed: {
 // visitedViews() {
@@ -101,13 +106,16 @@ const isActive = (route) => {
     return route.path === this.$route.path
 }
 const isAffix = (tag) => {
-    return tag.meta && tag.meta.affix
+    return true
+    // return tag.meta && tag.meta.affix
 }
 const filterAffixTags = (routes, basePath = '/') => {
     let tags = []
+    // console.log(routes)
     routes.forEach((route) => {
-        if (route.meta && route.meta.affix) {
-            const tagPath = path.resolve(basePath, route.path)
+        if (route.meta) {
+            // const tagPath = path.resolve(basePath, route.path)
+            const tagPath = path.join(basePath, route.path)
             tags.push({
                 fullPath: tagPath,
                 path: tagPath,
@@ -126,12 +134,19 @@ const filterAffixTags = (routes, basePath = '/') => {
 }
 const initTags = () => {
     affixTags = filterAffixTags(router.options.routes)
+
     for (const tag of affixTags) {
         // Must have tag name
         if (tag.name) {
-            this.$store.dispatch('tagsView/addVisitedView', tag)
+            console.log('===>1')
+            console.log(tag.name)
+            // this.$store.dispatch('tagsView/addVisitedView', tag)
+            dispatch.tagsView.add(tag)
         }
     }
+
+    console.log(ctx.tagsView.length)
+    // console.log(context.tagsView)
 }
 const addTags = () => {
     const { name } = route
