@@ -8,10 +8,6 @@ import {
 } from './store'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
-// import {
-//   getToken,
-//   removeToken
-// } from './store/user'
 
 NProgress.configure({
   showSpinner: false,

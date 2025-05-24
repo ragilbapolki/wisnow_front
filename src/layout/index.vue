@@ -17,11 +17,13 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted, computed, watch } from 'vue'
+import { inject, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Sidebar, Navbar, AppMain, TagsView } from './components'
 import { isMobile, resizeHandler } from './mixin/ResizeHandler'
-import { sctx, ctx, dispatch } from '@/store'
+import { sctx, dispatch } from '@/store'
+
+const ctx = inject('context')
 
 const route = useRoute()
 const needTagsView = sctx.tagsView

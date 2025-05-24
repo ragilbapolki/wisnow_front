@@ -41,10 +41,6 @@ async function enableMocking() {
   })
 }
 
-
-
-
-
 enableMocking().then(async () => {
   // await import('@/permission')
 

@@ -1,4 +1,4 @@
-export default {
+export default Object.freeze({
   /**
    * @type {boolean} true | false
    * @description Whether need tagsView
@@ -16,4 +16,4 @@ export default {
    * @description Whether show the logo in sidebar
    */
   sidebarLogo: true
-}
+})

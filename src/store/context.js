@@ -2,7 +2,6 @@ import {
   reactive,
 } from 'vue'
 
-console.log('ccc')
 import {
   state as userState
 } from './modules/user'
