@@ -19,7 +19,7 @@
           v-if="!isAffix(tag)"
         />
       </router-link>-->
-      <div :key="tag.path" v-for="tag in ctx.tagsView">{{tag.title}}2</div>
+      <div :key="tag.path" v-for="tag in ctx.tagsView">{{tag.title}}4</div>
       {{ctx.tagsView.length}}
       <!-- {{context.tagsView.length}} -->
     </scroll-pane>
@@ -42,9 +42,14 @@ import path from 'path-browserify-esm'
 
 import ScrollPane from './ScrollPane.vue'
 
-import { sctx, ctx, dispatch } from '@/store'
+// import { ctx, dispatch } from '@/store'
+import { dispatch, ctx as ctx2 } from '@/store'
 
-// const context = inject('context')
+const ctx = inject('context')
+
+// console.log(333)
+// console.log(ctx2, ctx)
+
 // console.log(3)
 const router = useRouter()
 const route = useRoute()
@@ -138,10 +143,10 @@ const initTags = () => {
     for (const tag of affixTags) {
         // Must have tag name
         if (tag.name) {
-            console.log('===>1')
-            console.log(tag.name)
+            // console.log('===>1')
+            // console.log(tag.name)
             // this.$store.dispatch('tagsView/addVisitedView', tag)
-            dispatch.tagsView.add(tag)
+            dispatch.tagsView.add(ctx.tagsView, tag)
         }
     }
 
