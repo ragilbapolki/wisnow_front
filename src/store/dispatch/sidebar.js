@@ -1,12 +1,10 @@
 import {
-  setSidebarStatus,
-  getSidebarStatus
+  setSidebarStatus
 } from '../storage'
 
-export const state = {
-  opened: getSidebarStatus(),
-  withoutAnimation: false
-}
+import ctx from '../context'
+
+const state = ctx.sidebar
 
 export const dispatch = {
   close({
