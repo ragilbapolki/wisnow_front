@@ -34,7 +34,8 @@ const router = createRouter({
         meta: {
           title: 'Dashboard',
           icon: 'dashboard',
-          keepAlive: true
+          keepAlive: true,
+          affix: true
         }
       }, ]
     },

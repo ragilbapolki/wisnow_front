@@ -6,7 +6,7 @@ import ctx from '../context'
 
 const state = ctx.sidebar
 
-export const dispatch = {
+export default {
   close({
     withoutAnimation
   }) {

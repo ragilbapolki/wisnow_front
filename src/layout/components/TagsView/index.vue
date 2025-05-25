@@ -1,27 +1,26 @@
 <template>
   <div class="tags-view-container" id="tags-view-container">
-    <scroll-pane @scroll="handleScroll" class="tags-view-wrapper" ref="scrollPane">
-      <!-- <router-link
+    <scroll-pane @scroll="handleScroll" class="tags-view-wrapper" ref="scrollPaneDom">
+      <router-link
         :class="isActive(tag)?'active':''"
         :key="tag.path"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
         @click.middle.native="!isAffix(tag)?closeSelectedTag(tag):''"
         @contextmenu.prevent.native="openMenu(tag,$event)"
         class="tags-view-item"
-        ref="tag"
+        ref="tagsDom"
         tag="span"
-        v-for="tag in context.tagsView"
+        v-for="tag in ctx.tagsView"
       >
         {{ tag.title }}
-        <span
+        <el-icon
           @click.prevent.stop="closeSelectedTag(tag)"
           class="el-icon-close"
           v-if="!isAffix(tag)"
-        />
-      </router-link>-->
-      <div :key="tag.path" v-for="tag in ctx.tagsView">{{tag.title}}4</div>
-      {{ctx.tagsView.length}}
-      <!-- {{context.tagsView.length}} -->
+        >
+          <i-ep-Close />
+        </el-icon>
+      </router-link>
     </scroll-pane>
     <ul
       :style="{left: menu.left+'px',top: menu.top+'px'}"
@@ -36,16 +35,16 @@
   </div>
 </template>
 <script setup>
-import { ref, reactive, inject, computed, watch, onMounted } from 'vue'
+import { ref, reactive, inject, computed, watch, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import path from 'path-browserify-esm'
 
 import ScrollPane from './ScrollPane.vue'
 
 // import { ctx, dispatch } from '@/store'
-import { dispatch, ctx as ctx2 } from '@/store'
+import { dispatch, ctx } from '@/store'
 
-const ctx = inject('context')
+// const ctx = inject('context')
 
 // console.log(333)
 // console.log(ctx2, ctx)
@@ -53,6 +52,9 @@ const ctx = inject('context')
 // console.log(3)
 const router = useRouter()
 const route = useRoute()
+
+const tagsDom = ref(null)
+const scrollPaneDom = ref(null)
 
 const menu = reactive({
     visible: false,
@@ -107,18 +109,17 @@ onMounted(() => {
     addTags()
 })
 
-const isActive = (route) => {
-    return route.path === this.$route.path
+const isActive = (view) => {
+    return view.path === route.path
 }
 const isAffix = (tag) => {
-    return true
-    // return tag.meta && tag.meta.affix
+    return tag.meta && tag.meta.affix
 }
 const filterAffixTags = (routes, basePath = '/') => {
     let tags = []
     // console.log(routes)
     routes.forEach((route) => {
-        if (route.meta) {
+        if (route.meta && route.meta.affix) {
             // const tagPath = path.resolve(basePath, route.path)
             const tagPath = path.join(basePath, route.path)
             tags.push({
@@ -146,7 +147,7 @@ const initTags = () => {
             // console.log('===>1')
             // console.log(tag.name)
             // this.$store.dispatch('tagsView/addVisitedView', tag)
-            dispatch.tagsView.add(ctx.tagsView, tag)
+            dispatch.tagsView.add(tag)
         }
     }
 
@@ -156,45 +157,41 @@ const initTags = () => {
 const addTags = () => {
     const { name } = route
     if (name) {
-        // this.$store.dispatch('tagsView/addView', route)
+        dispatch.tagsView.add(route)
     }
     return false
 }
-const moveToCurrentTag = () => {
-    const tags = this.$refs.tag
-    this.$nextTick(() => {
-        for (const tag of tags) {
-            if (tag.to.path === this.$route.path) {
-                this.$refs.scrollPane.moveToTarget(tag)
-                // when query is different then update
-                if (tag.to.fullPath !== this.$route.fullPath) {
-                    this.$store.dispatch('tagsView/updateVisitedView', this.$route)
-                }
-                break
+const moveToCurrentTag = async () => {
+    await nextTick()
+    for (const tag of tagsDom.value) {
+        if (tag.to.path === route.path) {
+            scrollPaneDom.value.moveToTarget(tag, tagsDom)
+            // when query is different then update
+            if (tag.to.fullPath !== route.fullPath) {
+                dispatch.tagsView.update(route)
             }
+            break
         }
-    })
+    }
 }
-const refreshSelectedTag = (view) => {
-    this.$store.dispatch('tagsView/delCachedView', view).then(() => {
+const refreshSelectedTag = async (view) => {
+    this.$store.dispatch('tagsView/delCachedView', view).then(async () => {
         const { fullPath } = view
-        this.$nextTick(() => {
-            this.$router.replace({
-                path: '/redirect' + fullPath,
-            })
+        await nextTick()
+        this.$router.replace({
+            path: '/redirect' + fullPath,
         })
     })
 }
 const closeSelectedTag = (view) => {
-    this.$store.dispatch('tagsView/delView', view).then(({ visitedViews }) => {
-        if (isActive(view)) {
-            toLastView(visitedViews, view)
-        }
-    })
+    dispatch.tagsView.remove(view)
+    if (isActive(view)) {
+        toLastView(view)
+    }
 }
 const closeOthersTags = () => {
-    this.$router.push(this.selectedTag)
-    this.$store.dispatch('tagsView/delOthersViews', this.selectedTag).then(() => {
+    this.$router.push(selectedTag)
+    this.$store.dispatch('tagsView/delOthersViews', selectedTag).then(() => {
         moveToCurrentTag()
     })
 }
@@ -203,21 +200,22 @@ const closeAllTags = (view) => {
         if (this.affixTags.some((tag) => tag.path === view.path)) {
             return
         }
-        toLastView(visitedViews, view)
+        toLastView(view)
     })
 }
-const toLastView = (visitedViews, view) => {
-    const latestView = visitedViews.slice(-1)[0]
+const toLastView = (view) => {
+    console.log(ctx.tagsView)
+    const latestView = ctx.tagsView.slice(-1)[0]
     if (latestView) {
-        this.$router.push(latestView.fullPath)
+        router.push(latestView.fullPath)
     } else {
         // now the default is to redirect to the home page if there is no tags-view,
         // you can adjust it according to your needs.
         if (view.name === 'Dashboard') {
             // to reload home page
-            this.$router.replace({ path: '/redirect' + view.fullPath })
+            router.replace({ path: '/redirect' + view.fullPath })
         } else {
-            this.$router.push('/')
+            router.push('/')
         }
     }
 }
@@ -229,17 +227,17 @@ const openMenu = (tag, e) => {
     const left = e.clientX - offsetLeft + 15 // 15: margin right
 
     if (left > maxLeft) {
-        this.left = maxLeft
+        menu.left = maxLeft
     } else {
-        this.left = left
+        menu.left = left
     }
 
-    this.top = e.clientY
-    this.visible = true
-    this.selectedTag = tag
+    menu.top = e.clientY
+    menu.visible = true
+    selectedTag = tag
 }
 const closeMenu = () => {
-    this.visible = false
+    menu.visible = false
 }
 const handleScroll = () => {
     closeMenu()

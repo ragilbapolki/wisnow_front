@@ -11,7 +11,7 @@ import ctx from '../context'
 
 const state = ctx.userInfo
 
-export const dispatch = {
+export default {
   getToken,
   setToken,
   removeToken,
