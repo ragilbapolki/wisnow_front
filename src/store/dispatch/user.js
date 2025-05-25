@@ -7,10 +7,10 @@ import {
   resetRouter
 } from '@/router'
 
-export const state = {
-  // name: '',
-  // avatar: ''
-}
+import ctx from '../context'
+
+const state = ctx.userInfo
+
 export const dispatch = {
   getToken,
   setToken,

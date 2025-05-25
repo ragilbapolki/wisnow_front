@@ -2,10 +2,10 @@ import context from './context'
 import staticContext from './static'
 import {
   dispatch as userDispatch
-} from './modules/user'
+} from './dispatch/user'
 import {
   dispatch as sidebarDispatch
-} from './modules/sidebar'
+} from './dispatch/sidebar'
 
 export const dispatch = {
   user: userDispatch,
