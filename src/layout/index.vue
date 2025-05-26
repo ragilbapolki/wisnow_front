@@ -11,22 +11,43 @@
         <Navbar />
         <TagsView v-if="needTagsView" />
       </div>
-      <AppMain />
+      <AppMain v-if="isRouterActive" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { inject, onMounted, onUnmounted, computed, watch } from 'vue'
+import { ref, inject, provide, nextTick, onMounted, onUnmounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { Sidebar, Navbar, AppMain, TagsView } from './components'
 import { isMobile, resizeHandler } from './mixin/ResizeHandler'
 import { sctx, dispatch } from '@/store'
 
 const ctx = inject('context')
-
 const route = useRoute()
+
 const needTagsView = sctx.tagsView
+const fixedHeader = sctx.fixedHeader
+
+const isRouterActive = ref(true)
+
+provide('reloadAppMain', () => {
+    isRouterActive.value = false
+    nextTick(() => {
+        setTimeout(() => {
+            isRouterActive.value = true
+        }, 100)
+    })
+})
+
+const classObj = computed(() => {
+    return {
+        hideSidebar: !ctx.sidebar.opened,
+        openSidebar: ctx.sidebar.opened,
+        withoutAnimation: ctx.sidebar.withoutAnimation,
+        mobile: ctx.device === 'mobile',
+    }
+})
 
 watch(
     () => route.path,
@@ -48,17 +69,6 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('resize', resizeHandler)
 })
-
-const classObj = computed(() => {
-    return {
-        hideSidebar: !ctx.sidebar.opened,
-        openSidebar: ctx.sidebar.opened,
-        withoutAnimation: ctx.sidebar.withoutAnimation,
-        mobile: ctx.device === 'mobile',
-    }
-})
-
-const fixedHeader = sctx.fixedHeader
 
 const handleClickOutside = () => {
     dispatch.sidebar.close({ withoutAnimation: false })

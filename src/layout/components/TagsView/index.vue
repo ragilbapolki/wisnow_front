@@ -1,5 +1,5 @@
 <template>
-  <div class="tags-view-container" id="tags-view-container">
+  <div class="tags-view-container" id="tags-view-container" ref="tagsRootDom">
     <scroll-pane @scroll="handleScroll" class="tags-view-wrapper" ref="scrollPaneDom">
       <router-link
         :class="isActive(tag)?'active':''"
@@ -16,7 +16,7 @@
         <el-icon
           @click.prevent.stop="closeSelectedTag(tag)"
           class="el-icon-close"
-          v-if="!isAffix(tag)"
+          v-if="!isAffix(tag) && ctx.tagsView.length > 1"
         >
           <i-ep-Close />
         </el-icon>
@@ -27,50 +27,37 @@
       class="contextmenu"
       v-show="menu.visible"
     >
-      <li @click="refreshSelectedTag(selectedTag)">Refresh</li>
+      <li @click="reloadAppMain">Refresh</li>
       <li @click="closeSelectedTag(selectedTag)" v-if="!isAffix(selectedTag)">Close</li>
       <li @click="closeOthersTags">Close Others</li>
-      <li @click="closeAllTags(selectedTag)">Close All</li>
     </ul>
   </div>
 </template>
 <script setup>
-import { ref, reactive, inject, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, reactive, inject, watch, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import path from 'path-browserify-esm'
 
 import ScrollPane from './ScrollPane.vue'
-
-// import { ctx, dispatch } from '@/store'
 import { dispatch, ctx } from '@/store'
 
-// const ctx = inject('context')
+const reloadAppMain = inject('reloadAppMain')
 
-// console.log(333)
-// console.log(ctx2, ctx)
-
-// console.log(3)
 const router = useRouter()
 const route = useRoute()
 
 const tagsDom = ref(null)
 const scrollPaneDom = ref(null)
+const tagsRootDom = ref(null)
 
 const menu = reactive({
     visible: false,
     top: 0,
     left: 0,
 })
-const visitedViews = reactive([])
 
-const selectedTag = {}
+let selectedTag = null
 let affixTags = []
-
-// console.log('====>router')
-// console.log(router)
-
-// console.log('====>route')
-// console.log({ ...route })
 
 // computed: {
 // visitedViews() {
@@ -88,6 +75,7 @@ let affixTags = []
 watch(
     () => route.path,
     () => {
+        console.log('watch route')
         addTags()
         moveToCurrentTag()
     }
@@ -113,14 +101,14 @@ const isActive = (view) => {
     return view.path === route.path
 }
 const isAffix = (tag) => {
+    if (!tag) return false
     return tag.meta && tag.meta.affix
 }
 const filterAffixTags = (routes, basePath = '/') => {
     let tags = []
-    // console.log(routes)
     routes.forEach((route) => {
         if (route.meta && route.meta.affix) {
-            // const tagPath = path.resolve(basePath, route.path)
+            // if (route.meta) {
             const tagPath = path.join(basePath, route.path)
             tags.push({
                 fullPath: tagPath,
@@ -140,20 +128,14 @@ const filterAffixTags = (routes, basePath = '/') => {
 }
 const initTags = () => {
     affixTags = filterAffixTags(router.options.routes)
-
     for (const tag of affixTags) {
         // Must have tag name
         if (tag.name) {
-            // console.log('===>1')
-            // console.log(tag.name)
-            // this.$store.dispatch('tagsView/addVisitedView', tag)
             dispatch.tagsView.add(tag)
         }
     }
-
-    console.log(ctx.tagsView.length)
-    // console.log(context.tagsView)
 }
+
 const addTags = () => {
     const { name } = route
     if (name) {
@@ -161,6 +143,7 @@ const addTags = () => {
     }
     return false
 }
+
 const moveToCurrentTag = async () => {
     await nextTick()
     for (const tag of tagsDom.value) {
@@ -174,55 +157,25 @@ const moveToCurrentTag = async () => {
         }
     }
 }
-const refreshSelectedTag = async (view) => {
-    this.$store.dispatch('tagsView/delCachedView', view).then(async () => {
-        const { fullPath } = view
-        await nextTick()
-        this.$router.replace({
-            path: '/redirect' + fullPath,
-        })
-    })
-}
 const closeSelectedTag = (view) => {
     dispatch.tagsView.remove(view)
     if (isActive(view)) {
-        toLastView(view)
+        toLastView()
     }
 }
-const closeOthersTags = () => {
-    this.$router.push(selectedTag)
-    this.$store.dispatch('tagsView/delOthersViews', selectedTag).then(() => {
-        moveToCurrentTag()
-    })
-}
-const closeAllTags = (view) => {
-    this.$store.dispatch('tagsView/delAllViews').then(({ visitedViews }) => {
-        if (this.affixTags.some((tag) => tag.path === view.path)) {
-            return
-        }
-        toLastView(view)
-    })
-}
-const toLastView = (view) => {
-    console.log(ctx.tagsView)
+const toLastView = () => {
     const latestView = ctx.tagsView.slice(-1)[0]
-    if (latestView) {
-        router.push(latestView.fullPath)
-    } else {
-        // now the default is to redirect to the home page if there is no tags-view,
-        // you can adjust it according to your needs.
-        if (view.name === 'Dashboard') {
-            // to reload home page
-            router.replace({ path: '/redirect' + view.fullPath })
-        } else {
-            router.push('/')
-        }
-    }
+    latestView && router.push(latestView.fullPath)
+}
+
+const closeOthersTags = () => {
+    dispatch.tagsView.removeOthers(selectedTag)
+    router.push(selectedTag)
 }
 const openMenu = (tag, e) => {
     const menuMinWidth = 105
-    const offsetLeft = this.$el.getBoundingClientRect().left // container margin left
-    const offsetWidth = this.$el.offsetWidth // container width
+    const offsetLeft = tagsRootDom.value.getBoundingClientRect().left // container margin left
+    const offsetWidth = tagsRootDom.value.offsetWidth // container width
     const maxLeft = offsetWidth - menuMinWidth // left boundary
     const left = e.clientX - offsetLeft + 15 // 15: margin right
 

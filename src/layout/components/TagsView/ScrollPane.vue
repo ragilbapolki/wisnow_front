@@ -16,7 +16,6 @@ const emit = defineEmits()
 const scrollContainer = ref(null)
 
 const tagAndTagSpacing = 4 // tagAndTagSpacing
-let left = 0
 
 const scrollWrapper = computed(() => {
     return scrollContainer.value.$refs.wrapRef
