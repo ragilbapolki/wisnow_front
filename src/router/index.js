@@ -15,9 +15,7 @@ import {
 } from '@element-plus/icons-vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL),
-  routes: [
-
-    {
+  routes: [{
       path: '/account/login',
       name: 'login',
       hidden: true,
@@ -35,7 +33,7 @@ const router = createRouter({
           title: 'Dashboard',
           icon: 'dashboard',
           keepAlive: true,
-          // affix: true
+          affix: true
         }
       }, ]
     },

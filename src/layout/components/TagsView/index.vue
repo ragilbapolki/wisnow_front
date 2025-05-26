@@ -5,11 +5,9 @@
         :class="isActive(tag)?'active':''"
         :key="tag.path"
         :to="{ path: tag.path, query: tag.query, fullPath: tag.fullPath }"
-        @click.middle.native="!isAffix(tag)?closeSelectedTag(tag):''"
         @contextmenu.prevent.native="openMenu(tag,$event)"
         class="tags-view-item"
         ref="tagsDom"
-        tag="span"
         v-for="tag in ctx.tagsView"
       >
         {{ tag.title }}
@@ -28,8 +26,11 @@
       v-show="menu.visible"
     >
       <li @click="reloadAppMain">Refresh</li>
-      <li @click="closeSelectedTag(selectedTag)" v-if="!isAffix(selectedTag)">Close</li>
-      <li @click="closeOthersTags">Close Others</li>
+      <li
+        @click="closeSelectedTag(selectedTag)"
+        v-if="!isAffix(selectedTag) && ctx.tagsView.length > 1"
+      >Close</li>
+      <li @click="closeOthersTags" v-if="ctx.tagsView.length > 1">Close Others</li>
     </ul>
   </div>
 </template>
@@ -59,23 +60,9 @@ const menu = reactive({
 let selectedTag = null
 let affixTags = []
 
-// computed: {
-// visitedViews() {
-//     return this.$store.state.tagsView.visitedViews
-// },
-// routes() {
-//     return this.$store.state.permission.routes
-// },
-// },
-
-// const isExternal = computed(() => {
-//     return isExt(props.icon)
-// })
-
 watch(
     () => route.path,
     () => {
-        console.log('watch route')
         addTags()
         moveToCurrentTag()
     }
@@ -83,13 +70,10 @@ watch(
 
 watch(
     () => menu.visible,
-    (value) => {
-        if (value) {
-            document.body.addEventListener('click', closeMenu)
-        } else {
-            document.body.removeEventListener('click', closeMenu)
-        }
-    }
+    (value) =>
+        value
+            ? document.body.addEventListener('click', closeMenu)
+            : document.body.removeEventListener('click', closeMenu)
 )
 
 onMounted(() => {
@@ -104,12 +88,17 @@ const isAffix = (tag) => {
     if (!tag) return false
     return tag.meta && tag.meta.affix
 }
+
 const filterAffixTags = (routes, basePath = '/') => {
     let tags = []
     routes.forEach((route) => {
-        if (route.meta && route.meta.affix) {
-            // if (route.meta) {
-            const tagPath = path.join(basePath, route.path)
+        const tagPath = path.join(basePath, route.path)
+        if (route.children) {
+            const tempTags = filterAffixTags(route.children, tagPath)
+            if (tempTags.length >= 1) {
+                tags = [...tags, ...tempTags]
+            }
+        } else if (route.meta && route.name && route.meta.affix) {
             tags.push({
                 fullPath: tagPath,
                 path: tagPath,
@@ -117,22 +106,13 @@ const filterAffixTags = (routes, basePath = '/') => {
                 meta: { ...route.meta },
             })
         }
-        if (route.children) {
-            const tempTags = filterAffixTags(route.children, route.path)
-            if (tempTags.length >= 1) {
-                tags = [...tags, ...tempTags]
-            }
-        }
     })
     return tags
 }
 const initTags = () => {
     affixTags = filterAffixTags(router.options.routes)
     for (const tag of affixTags) {
-        // Must have tag name
-        if (tag.name) {
-            dispatch.tagsView.add(tag)
-        }
+        dispatch.tagsView.add(tag)
     }
 }
 
@@ -142,20 +122,6 @@ const addTags = () => {
         dispatch.tagsView.add(route)
     }
     return false
-}
-
-const moveToCurrentTag = async () => {
-    await nextTick()
-    for (const tag of tagsDom.value) {
-        if (tag.to.path === route.path) {
-            scrollPaneDom.value.moveToTarget(tag, tagsDom)
-            // when query is different then update
-            if (tag.to.fullPath !== route.fullPath) {
-                dispatch.tagsView.update(route)
-            }
-            break
-        }
-    }
 }
 const closeSelectedTag = (view) => {
     dispatch.tagsView.remove(view)
@@ -167,7 +133,6 @@ const toLastView = () => {
     const latestView = ctx.tagsView.slice(-1)[0]
     latestView && router.push(latestView.fullPath)
 }
-
 const closeOthersTags = () => {
     dispatch.tagsView.removeOthers(selectedTag)
     router.push(selectedTag)
@@ -193,7 +158,24 @@ const closeMenu = () => {
     menu.visible = false
 }
 const handleScroll = () => {
+    if (!menu.visible) return
     closeMenu()
+}
+
+const moveToCurrentTag = async () => {
+    await nextTick()
+    for (const tag of tagsDom.value) {
+        if (tag.to.path === route.path) {
+            scrollPaneDom.value.moveToTarget(tag, tagsDom)
+            // when query is different then update
+            console.log('什么情况下会true呢:')
+            console.log(tag.to.fullPath !== route.fullPath)
+            if (tag.to.fullPath !== route.fullPath) {
+                dispatch.tagsView.update(route)
+            }
+            break
+        }
+    }
 }
 </script>
 
