@@ -1,10 +1,5 @@
 <template>
-  <el-scrollbar
-    :vertical="false"
-    @wheel.native.prevent="handleScroll"
-    class="scroll-container"
-    ref="scrollContainer"
-  >
+  <el-scrollbar :vertical="false" class="scroll-container" ref="scrollContainer">
     <slot />
   </el-scrollbar>
 </template>
@@ -18,6 +13,8 @@ const scrollContainer = ref(null)
 const tagAndTagSpacing = 4 // tagAndTagSpacing
 
 const scrollWrapper = computed(() => {
+    // 滚动条设置了overflow的元素 也可理解为滚动区
+    // https://element-plus.org/zh-CN/component/scrollbar.html#exposes
     return scrollContainer.value.$refs.wrapRef
 })
 
@@ -28,19 +25,17 @@ onBeforeUnmount(() => {
     scrollWrapper.value.removeEventListener('scroll', emitScroll)
 })
 
-const handleScroll = (e) => {
-    const eventDelta = e.wheelDelta || -e.deltaY * 40
-    const $scrollWrapper = scrollWrapper
-    $scrollWrapper.value.scrollLeft = $scrollWrapper.value.scrollLeft + eventDelta / 4
-}
 const emitScroll = () => {
     emit('scroll')
 }
 defineExpose({
     moveToTarget: (currentTag, tagsDom) => {
-        const $container = scrollContainer.value.$el
-        const $containerWidth = $container.offsetWidth
-        const $scrollWrapper = scrollWrapper
+        // const $container = scrollContainer.value.$el // 组件ref的$el 可获取到组件的根元素
+        const wrapper = scrollWrapper.value // 滚动条设置了overflow的元素
+
+        const offsetWidth = wrapper.offsetWidth
+        const scrollWidth = wrapper.scrollWidth
+        const scrollLeft = wrapper.scrollLeft
         const tagList = tagsDom.value
 
         let firstTag = null
@@ -53,9 +48,9 @@ defineExpose({
         }
 
         if (firstTag === currentTag) {
-            $scrollWrapper.value.scrollLeft = 0
+            wrapper.scrollLeft = 0
         } else if (lastTag === currentTag) {
-            $scrollWrapper.value.scrollLeft = $scrollWrapper.value.scrollWidth - $containerWidth
+            wrapper.scrollLeft = scrollWidth - offsetWidth
         } else {
             // find preTag and nextTag
             const currentIndex = tagList.findIndex((item) => item === currentTag)
@@ -69,10 +64,10 @@ defineExpose({
             // the tag's offsetLeft before of prevTag
             const beforePrevTagOffsetLeft = prevTag.$el.offsetLeft - tagAndTagSpacing
 
-            if (afterNextTagOffsetLeft > $scrollWrapper.value.scrollLeft + $containerWidth) {
-                $scrollWrapper.value.scrollLeft = afterNextTagOffsetLeft - $containerWidth
-            } else if (beforePrevTagOffsetLeft < $scrollWrapper.value.scrollLeft) {
-                $scrollWrapper.value.scrollLeft = beforePrevTagOffsetLeft
+            if (afterNextTagOffsetLeft > scrollLeft + offsetWidth) {
+                wrapper.scrollLeft = afterNextTagOffsetLeft - offsetWidth
+            } else if (beforePrevTagOffsetLeft < scrollLeft) {
+                wrapper.scrollLeft = beforePrevTagOffsetLeft
             }
         }
     },
