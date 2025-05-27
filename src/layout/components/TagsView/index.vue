@@ -239,23 +239,16 @@ const moveToCurrentTag = async () => {
 }
 </style>
 
-<style lang="scss">
-//reset element css of el-icon-close
+<style lang="scss" scoped>
 .tags-view-wrapper {
     .tags-view-item {
         .el-icon-close {
-            width: 16px;
-            height: 16px;
-            vertical-align: 2px;
+            margin-left: 2px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             text-align: center;
             transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-            transform-origin: 100% 50%;
-            &:before {
-                transform: scale(0.6);
-                display: inline-block;
-                vertical-align: -3px;
-            }
             &:hover {
                 background-color: #b4bccc;
                 color: #fff;
