@@ -189,7 +189,8 @@ const moveToCurrentTag = async () => {
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
     .tags-view-wrapper {
         .tags-view-item {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
             position: relative;
             cursor: pointer;
             height: 26px;
@@ -211,16 +212,6 @@ const moveToCurrentTag = async () => {
                 background-color: #42b983;
                 color: #fff;
                 border-color: #42b983;
-                &::before {
-                    content: '';
-                    background: #fff;
-                    display: inline-block;
-                    width: 8px;
-                    height: 8px;
-                    border-radius: 50%;
-                    position: relative;
-                    margin-right: 2px;
-                }
             }
         }
     }
