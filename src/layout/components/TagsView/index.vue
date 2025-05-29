@@ -98,8 +98,8 @@ const filterAffixTags = (routes, basePath = '/') => {
             if (tempTags.length >= 1) {
                 tags = [...tags, ...tempTags]
             }
-        } else if (route.meta && route.name) {
-            // } else if (route.meta && route.name && route.meta.affix) {
+            // } else if (route.meta && route.name) {
+        } else if (route.meta && route.name && route.meta.affix) {
             tags.push({
                 fullPath: tagPath,
                 path: tagPath,
