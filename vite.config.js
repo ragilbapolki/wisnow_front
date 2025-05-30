@@ -23,6 +23,7 @@ import IconsResolver from 'unplugin-icons/resolver'
 
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
 
+import mdPlugin from 'vite-plugin-markdown'
 // const __dirname = path.resolve()
 
 
@@ -34,6 +35,9 @@ export default defineConfig(({
   const config = {
     base: env.VITE_BASE_URL,
     plugins: [
+      mdPlugin.plugin({
+        mode: [mdPlugin.Mode.VUE]
+      }),
       // svg 雪碧图
       VitePluginSvgSpritemap('./src/icons/svg/*.svg', {
         // injectSvgOnDev: true,

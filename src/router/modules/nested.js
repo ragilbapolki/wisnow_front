@@ -1,7 +1,4 @@
 import Layout from '@/layout/index.vue'
-import {
-  HelpFilled,
-} from '@element-plus/icons-vue'
 
 const nestedRouter = {
   path: '/nested',
@@ -18,7 +15,6 @@ const nestedRouter = {
       name: 'Menu1',
       meta: {
         title: 'Menu1',
-        icon: HelpFilled,
       },
       children: [{
           path: 'menu1-1',
@@ -61,7 +57,6 @@ const nestedRouter = {
       name: 'Menu2',
       meta: {
         title: 'menu2',
-        icon: 'nested',
       }
     }
   ]

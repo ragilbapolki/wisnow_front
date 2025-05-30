@@ -11,7 +11,7 @@ import Layout from '@/layout/index.vue'
 import {
   HelpFilled,
   Menu,
-  MessageBox
+  Clock
 } from '@element-plus/icons-vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL),
@@ -38,39 +38,34 @@ const router = createRouter({
       }, ]
     },
     {
-      path: '/store',
-      component: Layout,
-      redirect: '/store',
-      children: [{
-        path: 'index',
-        name: 'Store',
-        component: () => import('@/views/store.vue'),
-        meta: {
-          title: 'Store',
-          icon: MessageBox,
-          keepAlive: true
-        }
-      }, ]
-    },
-    {
       path: '/about',
       component: Layout,
+      redirect: '/about/test',
+      meta: {
+        alwaysShow: true,
+        title: 'About',
+        icon: HelpFilled
+      },
       children: [{
         path: 'index',
-        name: 'About',
-        component: () => import('@/views/AboutView.vue'),
+        name: 'Test',
+        component: () => import('@/views/about/test.vue'),
         meta: {
-          title: 'About',
-          icon: HelpFilled,
-          keepAlive: true
+          title: 'Test',
         }
-      }, ]
+      }, {
+        path: 'changelog',
+        name: 'Changelog',
+        component: () => import('@/views/about/changelog.vue'),
+        meta: {
+          title: 'Changelog',
+        }
+      }]
     },
     {
       path: '/example',
       component: Layout,
       redirect: '/example/table',
-
       meta: {
         alwaysShow: true,
         title: 'Example',
