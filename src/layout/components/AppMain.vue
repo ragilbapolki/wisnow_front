@@ -21,6 +21,7 @@
     width: 100%;
     position: relative;
     overflow: hidden;
+    box-sizing: content-box;
 }
 .fixed-header + .app-main {
     padding-top: 50px;
