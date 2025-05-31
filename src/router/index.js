@@ -54,6 +54,13 @@ const router = createRouter({
           title: 'Test',
         }
       }, {
+        path: 'readme',
+        name: 'Readme',
+        component: () => import('@/views/about/readme.vue'),
+        meta: {
+          title: 'Readme',
+        }
+      }, {
         path: 'changelog',
         name: 'Changelog',
         component: () => import('@/views/about/changelog.vue'),

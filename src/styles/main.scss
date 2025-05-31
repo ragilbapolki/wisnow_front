@@ -1,10 +1,8 @@
 @charset "utf-8";
 
-
-@forward './mixin.scss';
-@forward './transition.scss';
+@use './transition.scss';
 @use './element-ui.scss';
-@forward './sidebar.scss';
+@use './sidebar.scss';
 
 body {
   height: 100%;
