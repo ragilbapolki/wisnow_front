@@ -22,12 +22,12 @@ const ctx = reactive({
 
 setTimeout(function () {
     // 下面的修改不会引起页面变化
-    obj.a = 2
-    arr[0] = 2
+    // obj.a = 2
+    // arr[0] = 2
 
     // 这样才可以
-    // ctx.o.a = 2
-    // ctx.a[0] = 2
+    ctx.o.a = 2
+    ctx.a[0] = 2
 
     console.log(ctx.o.a, ctx.a[0]) // 这里的值始终是更新了的
 }, 3000)
