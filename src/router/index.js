@@ -11,8 +11,9 @@ import Layout from '@/layout/index.vue'
 import {
   HelpFilled,
   Menu,
-  Clock
+  Odometer
 } from '@element-plus/icons-vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL),
   routes: [{
@@ -40,20 +41,13 @@ const router = createRouter({
     {
       path: '/about',
       component: Layout,
-      redirect: '/about/test',
+      redirect: '/about/readme',
       meta: {
         alwaysShow: true,
         title: 'About',
         icon: HelpFilled
       },
       children: [{
-        path: 'index',
-        name: 'Test',
-        component: () => import('@/views/about/test.vue'),
-        meta: {
-          title: 'Test',
-        }
-      }, {
         path: 'readme',
         name: 'Readme',
         component: () => import('@/views/about/readme.vue'),
@@ -104,6 +98,15 @@ const router = createRouter({
             icon: 'form'
           },
           component: () => import('@/views/example/form.vue'),
+        },
+        {
+          path: 'index',
+          name: 'Test',
+          component: () => import('@/views/example/test.vue'),
+          meta: {
+            title: 'Test',
+            icon: Odometer,
+          }
         },
       ]
     },
