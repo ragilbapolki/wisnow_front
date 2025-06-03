@@ -81,7 +81,7 @@ const router = createRouter({
       children: [{
           path: 'table',
           name: 'Table',
-          component: () => import('@/views/table.vue'),
+          component: () => import('@/views/example/table.vue'),
           meta: {
             title: 'Table',
             icon: 'table',
@@ -94,22 +94,18 @@ const router = createRouter({
             title: 'Tree',
             icon: 'tree'
           },
-          component: () => import('@/views/tree.vue'),
+          component: () => import('@/views/example/tree.vue'),
+        },
+        {
+          path: 'form',
+          name: 'Form',
+          meta: {
+            title: 'Form',
+            icon: 'form'
+          },
+          component: () => import('@/views/example/form.vue'),
         },
       ]
-    },
-    {
-      path: '/form',
-      component: Layout,
-      children: [{
-        path: 'index',
-        name: 'Form',
-        component: () => import('@/views/form.vue'),
-        meta: {
-          title: 'Form',
-          icon: 'form'
-        }
-      }]
     },
     nestedRouter,
     {
