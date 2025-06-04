@@ -3,7 +3,6 @@ import {
   createWebHistory
   // createWebHashHistory
 } from 'vue-router'
-// import HomeView from '../views/HomeView.vue'
 
 import nestedRouter from './modules/nested'
 
@@ -100,7 +99,7 @@ const router = createRouter({
           component: () => import('@/views/example/form.vue'),
         },
         {
-          path: 'index',
+          path: 'test',
           name: 'Test',
           component: () => import('@/views/example/test.vue'),
           meta: {
