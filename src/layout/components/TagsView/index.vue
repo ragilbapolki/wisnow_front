@@ -61,7 +61,7 @@ let selectedTag = null
 let affixTags = []
 
 watch(
-    () => route.path,
+    () => route.fullPath,
     () => {
         addTags()
         moveToCurrentTag()
@@ -169,8 +169,6 @@ const moveToCurrentTag = async () => {
         if (tag.to.path === route.path) {
             scrollPaneDom.value.moveToTarget(tag, tagsDom)
             // when query is different then update
-            console.log('什么情况下会true呢:')
-            console.log(tag.to.fullPath !== route.fullPath)
             if (tag.to.fullPath !== route.fullPath) {
                 dispatch.tagsView.update(route)
             }
