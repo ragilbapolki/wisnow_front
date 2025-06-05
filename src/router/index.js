@@ -105,6 +105,7 @@ const router = createRouter({
           meta: {
             title: 'Test',
             icon: Odometer,
+            keepAlive: true,
           }
         },
       ]
