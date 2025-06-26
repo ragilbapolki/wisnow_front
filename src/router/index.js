@@ -65,13 +65,22 @@ const router = createRouter({
     {
       path: '/example',
       component: Layout,
-      redirect: '/example/table',
+      redirect: '/example/icon',
       meta: {
         alwaysShow: true,
         title: 'Example',
         icon: Menu
       },
       children: [{
+          path: 'icon',
+          name: 'Icons',
+          component: () => import('@/views/example/icon.vue'),
+          meta: {
+            title: 'Icons',
+            icon: 'icon',
+          }
+        },
+        {
           path: 'table',
           name: 'Table',
           component: () => import('@/views/example/table.vue'),
