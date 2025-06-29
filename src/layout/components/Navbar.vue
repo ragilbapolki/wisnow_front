@@ -14,13 +14,11 @@
           </el-icon>
         </div>
       </el-tooltip>
-      <el-tooltip content="Under development" effect="dark" placement="bottom">
-        <div class="right-menu-item hover-effect">
-          <el-icon>
-            <i-ep-Setting />
-          </el-icon>
-        </div>
-      </el-tooltip>
+      <div class="right-menu-item hover-effect" v-if="enableSettings" @click="rightPanelRef.toggleVisibility">
+        <el-icon>
+          <i-ep-Setting />
+        </el-icon>
+      </div>
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
           <img :src="ctx.userInfo.avatar+'?imageView2/1/w/80/h/80'" class="user-avatar" />
@@ -41,19 +39,32 @@
       </el-dropdown>
     </div>
   </div>
+
+  <Teleport to="body">
+    <right-panel v-if="enableSettings" ref="rightPanelRef">
+      <!-- <settings /> -->
+    </right-panel>
+  </Teleport>
+  
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
+// import { Settings } from '.'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import Hamburger from '@/components/Hamburger.vue'
 
 import { logout } from '@/api/user'
-import { dispatch } from '@/store'
+import { sctx, dispatch } from '@/store'
+
+import RightPanel from '@/components/RightPanel.vue'
+
+const enableSettings = sctx.enableSettings
 
 const ctx = inject('context')
+const rightPanelRef = ref(null)
 
 const router = useRouter()
 const route = useRoute()

@@ -81,34 +81,95 @@ const handleClickOutside = () => {
 @use '@/styles/mixin.scss' as *;
 
 .app-wrapper {
-    @include clearfix;
-    position: relative;
-    height: 100%;
-    width: 100%;
-    &.mobile.openSidebar {
-        position: fixed;
-        top: 0;
-    }
+	@include clearfix;
+	position: relative;
+	height: 100%;
+	width: 100%;
+	&.mobile.openSidebar {
+		position: fixed;
+		top: 0;
+	}
+}
+.main-container{
+	min-height: 100%;
+	transition: margin-left .28s;
+	margin-left: v.$sideBarWidth;
+	position: relative;
+	z-index: 1;
 }
 .drawer-bg {
-    background: #000;
-    opacity: 0.3;
-    width: 100%;
-    top: 0;
-    height: 100%;
-    position: absolute;
-    z-index: 999;
+	background: #000;
+	opacity: 0.3;
+	width: 100%;
+	top: 0;
+	height: 100%;
+	position: absolute;
+	z-index: 2;
 }
+.sidebar-container {
+	transition: width 0.28s;
+	width: v.$sideBarWidth !important;
+	background-color: v.$menuBg;
+	height: 100%;
+	position: fixed;
+	font-size: 0px;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 3;
+	overflow: hidden;
+}
+
+.hideSidebar {
+	.sidebar-container {
+		width: 54px !important;
+	}
+	.main-container {
+		margin-left: 54px;
+	}
+}
+
+// mobile responsive
+.mobile {
+	.main-container {
+		margin-left: 0px;
+	}
+
+	.sidebar-container {
+		transition: transform .28s;
+		width: v.$sideBarWidth !important;
+	}
+
+	&.hideSidebar {
+		.sidebar-container {
+			pointer-events: none;
+			// transition-duration: 0.3s;
+			transform: translate3d(- v.$sideBarWidth, 0, 0);
+		}
+	}
+}
+
+.withoutAnimation {
+	.main-container,
+	.sidebar-container {
+		transition: none;
+	}
+}
+
+
+
+
+
+
 
 .fixed-header {
     position: fixed;
     top: 0;
     right: 0;
-    z-index: 9;
+    z-index: 1;
     width: calc(100% - #{v.$sideBarWidth});
     transition: width 0.28s;
 }
-
 .hideSidebar .fixed-header {
     width: calc(100% - 54px);
 }
@@ -116,4 +177,7 @@ const handleClickOutside = () => {
 .mobile .fixed-header {
     width: 100%;
 }
+
+
+
 </style>
