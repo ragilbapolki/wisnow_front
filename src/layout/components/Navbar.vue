@@ -14,9 +14,9 @@
           </el-icon>
         </div>
       </el-tooltip>
-      <div class="right-menu-item hover-effect" v-if="enableSettings" @click="rightPanelRef.toggleVisibility">
+      <div class="right-menu-item hover-effect" @click="rightPanelRef.toggleVisibility">
         <el-icon>
-          <i-ep-Setting />
+          <i-ep-Bell />
         </el-icon>
       </div>
       <el-dropdown class="avatar-container" trigger="click">
@@ -41,8 +41,11 @@
   </div>
 
   <Teleport to="body">
-    <right-panel v-if="enableSettings" ref="rightPanelRef">
-      <!-- <settings /> -->
+    <right-panel ref="rightPanelRef">
+      <!-- 历史记录、文档类 -->
+       <div style="padding:20px;color:#666;">
+        Under development
+       </div>
     </right-panel>
   </Teleport>
   
@@ -52,16 +55,13 @@
 import { inject, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-// import { Settings } from '.'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 import Hamburger from '@/components/Hamburger.vue'
 
 import { logout } from '@/api/user'
-import { sctx, dispatch } from '@/store'
+import { dispatch } from '@/store'
 
 import RightPanel from '@/components/RightPanel.vue'
-
-const enableSettings = sctx.enableSettings
 
 const ctx = inject('context')
 const rightPanelRef = ref(null)
