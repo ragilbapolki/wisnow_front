@@ -1,10 +1,22 @@
 <template>
 	<div class="app-container">
-		<el-tabs v-model="activeName" class="demo-tabs">
-			<el-tab-pane label="Custom Icons" name="first">
-				Custom Icons...
+		<el-tabs class="demo-tabs">
+			<el-tab-pane label="Custom Icons">
+				<aside>
+					<a class="link" href="https://spiriitlabs.github.io/vite-plugin-svg-spritemap/" target="_blank">@spiriit/vite-plugin-svg-spritemap</a>
+				</aside>
+				<div class="grid">
+					<div v-for="item of iconNameList" :key="item" @click="handleClipboard(generateIconCode(item))">
+						<el-tooltip placement="top" :content="generateIconCode(item)" :disabled="disabled">
+							<div class="icon-item">
+								<svg-icon :icon="item" />
+								<span>{{ item }}</span>
+							</div>
+						</el-tooltip>
+					</div>
+				</div>
 			</el-tab-pane>
-			<el-tab-pane label="Element-Plus-UI Icons" name="second">
+			<el-tab-pane label="Element-Plus-UI Icons">
 				<aside>
 					<a class="link" href="https://icon-sets.iconify.design/ep/" target="_blank">@iconify-json/ep</a>
 				</aside>
@@ -32,9 +44,19 @@ import {
   copyText
 } from '@/utils'
 import * as elementIcons from '@element-plus/icons-vue'
+import {
+	iconNameList
+} from '@/icons'
 
 const disabled = ref(false)
-const activeName = ref('first')
+
+const generateIconCode = (symbol) => {
+	return `<svg-icon icon="${symbol}" />`
+}
+
+const generateElementIconCode = (symbol) => {
+	return `<el-icon><i-ep-${symbol} /></el-icon>`
+}
 
 const handleClipboard = (text) => {
 	disabled.value = true
@@ -50,9 +72,6 @@ const handleClipboard = (text) => {
 	})
 }
 
-const generateElementIconCode = (symbol) => {
-	return `<el-icon><i-ep-${symbol} /></el-icon>`
-}
 </script>
 
 
