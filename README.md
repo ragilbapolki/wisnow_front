@@ -30,14 +30,12 @@
 
 ## 简介
 
-本项目旨在提供一个使用最新技术、ui极简、轻量级的 vue admin 管理后台，它只提供一些必要的依赖和功能。
+本项目提供一个轻量级、UI极简的 Vue admin 后台，采用最新稳定依赖，减少升级维护成本，让开发者更专注于业务逻辑。
 
 **Demo:** <https://chocho-1115.github.io/vue-admin/>
 
-之所以想要从零开始搭建它，是因为我并没有寻找到符合上述初衷的方案。如果你有好的推荐❤️，可以把它介绍给我。在这个寻找的过程中发现[vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)尽管不是使用最新技术栈搭建的，但是其功能很符合预期，所以本项目前期参考了它。
-
-[vue-admin](https://github.com/chocho-1115/vue-admin) 是一个后台管理 spa 页面，它基于 [vue](https://vuejs.org/) 和 [element-plus](https://element-plus.org/zh-CN/) 采用了最新的前端技术栈，实现了登录权限验证，并使用 [fakerjs](https://fakerjs.dev/)+[mswjs](https://mswjs.io/) 来模拟请求数据。
-
+> [!NOTE]
+> 项目前期ui参考了 [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)。
 
 ## 🎉 技术栈
 
