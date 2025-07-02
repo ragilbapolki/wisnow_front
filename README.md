@@ -35,7 +35,7 @@
 **Demo:** <https://chocho-1115.github.io/vue-admin/>
 
 > [!NOTE]
-> 项目前期ui参考了 [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)。
+> 项目前期ui参考了 [vue-admin-template](https://github.com/PanJiaChen/vue-admin-template)
 
 ## 🎉 技术栈
 
