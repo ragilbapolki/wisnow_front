@@ -6,12 +6,14 @@
       v-if="ctx.device==='mobile'&&ctx.sidebar.opened"
     />
     <Sidebar class="sidebar-container" />
-    <div :class="{hasTagsView:needTagsView}" class="main-container">
+    <div :class="{hasTagsView: needTagsView}" class="main-container">
       <div :class="{'fixed-header': fixedHeader}">
         <Navbar />
         <TagsView v-if="needTagsView" />
       </div>
-      <AppMain v-if="isRouterActive" />
+			<div class="app-main">
+					<AppMain v-if="isRouterActive" />
+			</div>
     </div>
   </div>
 </template>
@@ -77,7 +79,6 @@ const handleClickOutside = () => {
 
 <style lang="scss" scoped>
 @use '@/styles/variables.module.scss' as v;
-
 @use '@/styles/mixin.scss' as *;
 
 .app-wrapper {
@@ -156,19 +157,13 @@ const handleClickOutside = () => {
 	}
 }
 
-
-
-
-
-
-
 .fixed-header {
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 1;
-    width: calc(100% - #{v.$sideBarWidth});
-    transition: width 0.28s;
+	position: fixed;
+	top: 0;
+	right: 0;
+	z-index: 2;
+	width: calc(100% - #{v.$sideBarWidth});
+	transition: width 0.28s;
 }
 .hideSidebar .fixed-header {
     width: calc(100% - 54px);
@@ -178,6 +173,26 @@ const handleClickOutside = () => {
     width: 100%;
 }
 
-
+.app-main {
+    /* 50= navbar  50  */
+    min-height: calc(100vh - 50px);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    box-sizing: content-box;
+	z-index:1
+}
+.fixed-header + .app-main {
+    padding-top: 50px;
+}
+.hasTagsView {
+    .app-main {
+        /* 84 = navbar + tags-view = 50 + 34 */
+        min-height: calc(100vh - 84px);
+    }
+    .fixed-header + .app-main {
+        padding-top: 84px;
+    }
+}
 
 </style>

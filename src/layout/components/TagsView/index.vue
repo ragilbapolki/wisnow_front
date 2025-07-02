@@ -211,6 +211,18 @@ const moveToCurrentTag = async () => {
                 color: #fff;
                 border-color: #42b983;
             }
+            .el-icon-close {
+                margin-left: 2px;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                text-align: center;
+                transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+                &:hover {
+                    background-color: #b4bccc;
+                    color: #fff;
+                }
+            }
         }
     }
     .contextmenu {
@@ -231,25 +243,6 @@ const moveToCurrentTag = async () => {
             cursor: pointer;
             &:hover {
                 background: #eee;
-            }
-        }
-    }
-}
-</style>
-
-<style lang="scss" scoped>
-.tags-view-wrapper {
-    .tags-view-item {
-        .el-icon-close {
-            margin-left: 2px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            text-align: center;
-            transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-            &:hover {
-                background-color: #b4bccc;
-                color: #fff;
             }
         }
     }
