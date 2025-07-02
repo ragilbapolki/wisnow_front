@@ -1,22 +1,7 @@
 <template>
 	<div class="app-container">
 		<el-tabs class="demo-tabs">
-			<el-tab-pane label="Custom Icons">
-				<aside>
-					<a class="link" href="https://spiriitlabs.github.io/vite-plugin-svg-spritemap/" target="_blank">@spiriit/vite-plugin-svg-spritemap</a>
-				</aside>
-				<div class="grid">
-					<div v-for="item of iconNameList" :key="item" @click="handleClipboard(generateIconCode(item))">
-						<el-tooltip placement="top" :content="generateIconCode(item)" :disabled="disabled">
-							<div class="icon-item">
-								<svg-icon :icon="item" />
-								<span>{{ item }}</span>
-							</div>
-						</el-tooltip>
-					</div>
-				</div>
-			</el-tab-pane>
-			<el-tab-pane label="Element-Plus-UI Icons">
+			<el-tab-pane label="Element-Plus Icons">
 				<aside>
 					<a class="link" href="https://icon-sets.iconify.design/ep/" target="_blank">@iconify-json/ep</a>
 				</aside>
@@ -28,6 +13,21 @@
 									<component :is="item" />
 								</el-icon>
 								<span>{{ item.__name }}</span>
+							</div>
+						</el-tooltip>
+					</div>
+				</div>
+			</el-tab-pane>
+			<el-tab-pane label="Custom Icons">
+				<aside>
+					<a class="link" href="https://spiriitlabs.github.io/vite-plugin-svg-spritemap/" target="_blank">@spiriit/vite-plugin-svg-spritemap</a>
+				</aside>
+				<div class="grid">
+					<div v-for="item of iconNameList" :key="item" @click="handleClipboard(generateIconCode(item))">
+						<el-tooltip placement="top" :content="generateIconCode(item)" :disabled="disabled">
+							<div class="icon-item">
+								<svg-icon :icon="item" />
+								<span>{{ item }}</span>
 							</div>
 						</el-tooltip>
 					</div>
@@ -100,7 +100,7 @@ const handleClipboard = (text) => {
 	width: 100px;
 	float: left;
 	color: #6b778c;
-  font-size: 24px;
+  	font-size: 24px;
 	cursor: pointer;
 	span {
 		display: block;
