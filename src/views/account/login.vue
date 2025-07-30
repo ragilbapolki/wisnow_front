@@ -165,8 +165,9 @@ $cursor: #fff;
             caret-color: $cursor;
 
             &:-webkit-autofill {
-                box-shadow: 0 0 0px 1000px $bg inset !important;
+                box-shadow: 0 0 0px 1000px transparent inset !important;
                 -webkit-text-fill-color: $cursor !important;
+                // transition: background-color 50000s ease-in-out 0s; //背景色透明 生效时长 过渡效果 启用时延迟的时间
             }
         }
     }
