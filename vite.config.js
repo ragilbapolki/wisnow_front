@@ -14,18 +14,16 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
-import {
-  ElementPlusResolver
-} from 'unplugin-vue-components/resolvers'
 
+// ElementPlus components
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+// ElementPlus svg icon
 import Icons from 'unplugin-icons/vite'
 import IconsResolver from 'unplugin-icons/resolver'
-
+// SvgSpritemap
 import VitePluginSvgSpritemap from '@spiriit/vite-plugin-svg-spritemap'
-
+// markdown
 import mdPlugin from 'vite-plugin-markdown'
-// const __dirname = path.resolve()
-
 
 export default defineConfig(({
   mode
