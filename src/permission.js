@@ -57,21 +57,25 @@ router.beforeEach(async (to, from, next) => {
           // remove token and go to login page to re-login
           dispatch.user.removeToken()
           ElMessage.error(error || 'Has Error')
-          next(`/account/login?redirect=${to.path}`)
-          NProgress.done()
+          if (whiteList.indexOf(to.path) === -1) {
+            next(`/account/login?redirect=${to.path}`)
+            NProgress.done()
+          }else{
+            next()
+          }
         }
       }
     }
   } else {
     /* has no token*/
 
-    if (whiteList.indexOf(to.path) !== -1) {
-      // in the free login whitelist, go directly
-      next()
-    } else {
+    if (whiteList.indexOf(to.path) === -1) {
       // other pages that do not have permission to access are redirected to the login page.
       next(`/account/login?redirect=${to.path}`)
       NProgress.done()
+    } else {
+      // in the free login whitelist, go directly
+      next()
     }
   }
 })
