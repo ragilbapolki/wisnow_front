@@ -3,7 +3,7 @@
     <el-form
       :model="loginForm"
       :rules="loginRules"
-      auto-complete="on"
+      autocomplete="on"
       class="login-form"
       label-position="left"
       ref="formDom"
@@ -13,41 +13,48 @@
       </div>
 
       <el-form-item prop="username">
-        <span class="svg-container">
-          <svg-icon icon="user" />
-        </span>
         <el-input
-          auto-complete="on"
+				 	size="large"
+          autocomplete="on"
           name="username"
           placeholder="Username"
           ref="username"
           tabindex="1"
           type="text"
           v-model="loginForm.username"
-        />
+        >
+					<template #prefix>
+						<svg-icon icon="user" />
+					</template>
+        </el-input>
       </el-form-item>
 
       <el-form-item prop="password">
-        <span class="svg-container">
-          <svg-icon icon="password" />
-        </span>
         <el-input
+					size="large"
           :key="passwordType"
           :type="passwordType"
           @keyup.enter.native="handleLogin"
-          auto-complete="on"
+          autocomplete="on"
           name="password"
           placeholder="Password"
           ref="passwordDom"
           tabindex="2"
           v-model="loginForm.password"
-        />
-        <span @click="showPwd" class="show-pwd">
-          <svg-icon :icon="passwordType === 'password' ? 'eye' : 'eye-open'" />
-        </span>
+        >
+					<template #prefix>
+						<svg-icon icon="password" />
+					</template>
+					<template #suffix>
+						<span @click="showPwd">
+							<svg-icon :icon="passwordType === 'password' ? 'eye' : 'eye-open'" />
+						</span>
+					</template>
+				</el-input>
       </el-form-item>
 
       <el-button
+				size="large"
         :loading="loading"
         @click.native.prevent="handleLogin"
         style="width:100%;margin-bottom:30px;"
@@ -152,8 +159,6 @@ $cursor: #fff;
 /* reset element-ui css */
 .login-container {
     .el-input {
-        height: 47px;
-        width: 85%;
         .el-input__wrapper {
             background: transparent;
             box-shadow: none;
@@ -161,7 +166,6 @@ $cursor: #fff;
         input {
             -webkit-appearance: none;
             color: $light_gray;
-            height: 47px;
             caret-color: $cursor;
 
             &:-webkit-autofill {
@@ -175,7 +179,6 @@ $cursor: #fff;
         border: 1px solid rgba(255, 255, 255, 0.1);
         background: rgba(0, 0, 0, 0.1);
         border-radius: 5px;
-        color: #454545;
     }
 }
 </style>
@@ -212,14 +215,6 @@ $light_gray: #eee;
         }
     }
 
-    .svg-container {
-        padding: 6px 5px 6px 15px;
-        color: $dark_gray;
-        vertical-align: middle;
-        width: 30px;
-        display: inline-block;
-    }
-
     .title-container {
         position: relative;
 
@@ -230,16 +225,6 @@ $light_gray: #eee;
             text-align: center;
             font-weight: bold;
         }
-    }
-
-    .show-pwd {
-        position: absolute;
-        right: 10px;
-        top: 7px;
-        font-size: 16px;
-        color: $dark_gray;
-        cursor: pointer;
-        user-select: none;
     }
 }
 </style>
