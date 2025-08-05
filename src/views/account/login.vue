@@ -32,7 +32,6 @@
       <el-form-item prop="password">
         <el-input
 					size="large"
-          :key="passwordType"
           :type="passwordType"
           @keyup.enter.native="handleLogin"
           autocomplete="on"
