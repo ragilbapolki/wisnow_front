@@ -21,7 +21,7 @@ const props = defineProps({
         required: true,
     },
 })
-const title = ref('Vue Admin')
+const title = ref('Knowledge Base')
 const showLogo = ref(true)
 </script>
 

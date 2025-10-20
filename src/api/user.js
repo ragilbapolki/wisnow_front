@@ -1,23 +1,32 @@
 import request from '@/utils/request'
 
+// login user
 export function login(data) {
   return request({
-    url: '/user/login',
+    url: '/login',
     method: 'post',
     data
   })
 }
 
-export function getInfo() {
+// ambil info user
+export function getInfo(token) {
   return request({
-    url: '/user/info',
+    url: '/user',
     method: 'get',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   })
 }
 
-export function logout() {
+// logout
+export function logout(token) {
   return request({
-    url: '/user/logout',
-    method: 'post'
+    url: '/logout',
+    method: 'post',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
   })
 }

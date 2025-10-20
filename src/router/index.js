@@ -1,21 +1,28 @@
+// index.js
 import {
   createRouter,
   createWebHistory
-  // createWebHashHistory
 } from 'vue-router'
 
 import nestedRouter from './modules/nested'
+import Home from '@/views/Home.vue'
+import ArticleDetail from '@/views/ArticleDetail.vue'
+import ArticleList from '@/views/ArticleList.vue'
 
 import Layout from '@/layout/index.vue'
 import {
+  DocumentCopy,
+  Grid,
   HelpFilled,
   Menu,
-  Odometer
+  Odometer,
+  Picture
 } from '@element-plus/icons-vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.VITE_BASE_URL),
-  routes: [{
+  routes: [
+    {
       path: '/account/login',
       name: 'login',
       hidden: true,
@@ -23,8 +30,31 @@ const router = createRouter({
     },
     {
       path: '/',
+      name: 'Home',
+      component: Home,
+      meta: {
+        title: 'Home',
+        requiresAuth: false
+      }
+    },
+    {
+      path: '/articlesList',
+      name: 'PublicArticleList',
+      component: ArticleList
+    },
+    {
+      path: '/articles/:slug',
+      name: 'ArticleDetail',
+      component: ArticleDetail,
+      props: true
+    },
+    {
+      path: '/admin',
       component: Layout,
-      redirect: '/dashboard',
+      redirect: '/admin/dashboard',
+      meta: {
+        requiresAuth: true
+      },
       children: [{
         path: 'dashboard',
         name: 'Dashboard',
@@ -33,9 +63,10 @@ const router = createRouter({
           title: 'Dashboard',
           icon: 'dashboard',
           keepAlive: true,
-          affix: true
+          affix: true,
+          requiresAuth: true
         }
-      }, ]
+      }]
     },
     {
       path: '/about',
@@ -131,17 +162,136 @@ const router = createRouter({
         }
       }]
     },
+    // Categories Management
+    {
+      path: '/admin/categories',
+      component: Layout,
+      redirect: '/admin/categories/list',
+      meta: {
+        title: 'Categories',
+        icon: Grid
+      },
+      children: [
+        {
+          path: 'list',
+          name: 'CategoryList',
+          component: () => import('@/views/category/index.vue'),
+          meta: {
+            title: 'Category List',
+            icon: Grid,
+            breadcrumb: [
+              { title: 'Categories', to: '/admin/categories/list' },
+              { title: 'List' }
+            ]
+          }
+        },
+      ]
+    },
+    // Articles Management
+    {
+      path: '/admin/articles',
+      component: Layout,
+      redirect: '/admin/articles/list',
+      meta: {
+        title: 'Articles',
+        icon: DocumentCopy
+      },
+      children: [
+        {
+          path: 'list',
+          name: 'ArticleList',
+          component: () => import('@/views/article/ArticleList.vue'),
+          meta: {
+            title: 'Article List',
+            icon: DocumentCopy,
+            breadcrumb: [
+              { title: 'Articles', to: '/admin/articles/list' },
+              { title: 'List' }
+            ]
+          }
+        },
+        {
+          path: 'create',
+          name: 'ArticleCreate',
+          component: () => import('@/views/article/ArticleForm.vue'),
+          hidden: true,
+          meta: {
+            title: 'Create Article',
+            breadcrumb: [
+              { title: 'Articles', to: '/admin/articles/list' },
+              { title: 'Create' }
+            ]
+          }
+        },
+        {
+          path: 'edit/:id',
+          name: 'ArticleEdit',
+          component: () => import('@/views/article/ArticleForm.vue'),
+          hidden: true,
+          meta: {
+            title: 'Edit Article',
+            breadcrumb: [
+              { title: 'Articles', to: '/admin/articles/list' },
+              { title: 'Edit' }
+            ]
+          }
+        },
+        {
+          path: 'view/:id',
+          name: 'ArticleView',
+          component: () => import('@/views/article/ArticleView.vue'),
+          hidden: true,
+          meta: {
+            title: 'View Article',
+            breadcrumb: [
+              { title: 'Articles', to: '/admin/articles/list' },
+              { title: 'View' }
+            ]
+          }
+        },
+        {
+          path: ':id/gallery',
+          name: 'ArticleGallery',
+          component: () => import('@/views/article/ArticleGallery.vue'),
+          hidden: true,
+          meta: {
+            title: 'Article Gallery',
+            icon: Picture,
+            breadcrumb: [
+              { title: 'Articles', to: '/admin/articles/list' },
+              { title: 'Gallery' }
+            ]
+          }
+        }
+      ]
+    },
+    // 404 Error Page
     {
       path: '/404',
       component: () => import('@/views/404.vue'),
       hidden: true
     },
+    // Catch all 404
     {
       path: '/:pathMatch(.*)*',
       redirect: '/404',
       hidden: true
     },
   ],
+})
+
+// Navigation Guards
+router.beforeEach((to, from, next) => {
+  // Set page title
+  if (to.meta?.title) {
+    document.title = `${to.meta.title} - Admin Panel`
+  }
+
+  next()
+})
+
+router.afterEach((to, from) => {
+  // Remove loading state
 })
 
 export const resetRouter = () => {

@@ -1,5 +1,3 @@
-// import path from 'path'
-
 import {
   fileURLToPath,
   URL
@@ -52,7 +50,6 @@ export default defineConfig(({
             prefix: 'Icon'
           })
         ],
-
       }),
       Components({
         resolvers: [
@@ -76,7 +73,42 @@ export default defineConfig(({
         '@': fileURLToPath(new URL('./src', import.meta.url))
       },
     },
+    // Server configuration with proxy to fix CORS
+    server: {
+      host: '0.0.0.0',
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
+          changeOrigin: true,
+          secure: false,
+          // rewrite: (path) => path.replace(/^\/api/, '/api') // Optional: jika perlu rewrite path
+        },
+        '/storage': {
+          target: env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/sanctum': {
+          target: env.VITE_API_BASE_URL || 'http://127.0.0.1:8000',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
+    },
+    // Build configuration
+    build: {
+      sourcemap: mode === 'development',
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'element-plus': ['element-plus'],
+            'vue-vendor': ['vue', 'vue-router'],
+          }
+        }
+      }
+    }
   }
 
-  return defineConfig(config)
+  return config
 })

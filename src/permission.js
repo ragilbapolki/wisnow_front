@@ -1,80 +1,70 @@
+// permission.js
 import router from './router'
-import {
-  getInfo
-} from './api/user'
-import {
-  ctx,
-  dispatch
-} from './store'
+import { getInfo } from './api/user'
+import { ctx, dispatch } from './store'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 
-NProgress.configure({
-  showSpinner: false,
-})
+NProgress.configure({ showSpinner: false })
 
-// no redirect whitelist
-const whiteList = [
-  '/account/login',
-  '/404'
-]
+// ✅ Halaman yang bisa diakses tanpa login
+const whiteList = ['/account/login', '/404', '/'] // Tambahkan '/' untuk home page
 
 router.beforeEach(async (to, from, next) => {
-  // start progress bar
   NProgress.start()
+  document.title = to.meta.title ? `${to.meta.title} - Vue Admin` : 'Vue Admin'
 
-  // set page title
-  document.title = to.meta.title ? `${to.meta.title} - Vue Admin` : `Vue Admin`
-
-  // determine whether the user has logged in
   const hasToken = dispatch.user.getToken()
 
   if (hasToken) {
-
+    // ✅ Jika sudah login dan mengakses halaman login, redirect ke home (bukan dashboard)
     if (to.path === '/account/login') {
-      // if is logged in, redirect to the home page
-      next({
-        path: '/',
-      })
+      next({ path: '/' }) // Redirect ke home, bukan dashboard
       NProgress.done()
     } else {
-      const hasUserInfo = ctx.userInfo.name
+      const hasUserInfo = ctx.userInfo && ctx.userInfo.name
 
       if (hasUserInfo) {
         next()
       } else {
         try {
-          // get user info
-          const {
-            body
-          } = await getInfo(hasToken)
-          if (!body) {
-            throw new Error("Verification failed, please Login again.");
+          const response = await getInfo(hasToken)
+          const user = response.data
+
+          console.log('Extracted user:', user)
+
+          if (!user || !user.id || !user.name) {
+            console.error('Invalid user data:', user)
+            throw new Error('Verification failed, please login again.')
           }
-          dispatch.user.saveInfo(body)
+
+          console.log('Valid user info:', user)
+
+          // ✅ Simpan info user
+          dispatch.user.saveInfo(user)
+
           next()
         } catch (error) {
-          // remove token and go to login page to re-login
+          console.error('Permission error:', error)
+
           dispatch.user.removeToken()
-          ElMessage.error(error || 'Has Error')
-          if (whiteList.indexOf(to.path) === -1) {
+          console.error(error.message || 'Has Error')
+
+          if (!whiteList.includes(to.path)) {
             next(`/account/login?redirect=${to.path}`)
             NProgress.done()
-          }else{
+          } else {
             next()
           }
         }
       }
     }
   } else {
-    /* has no token*/
-
-    if (whiteList.indexOf(to.path) === -1) {
-      // other pages that do not have permission to access are redirected to the login page.
+    // ✅ Jika belum login, cek apakah halaman butuh auth
+    if (!whiteList.includes(to.path) && to.meta?.requiresAuth !== false) {
       next(`/account/login?redirect=${to.path}`)
       NProgress.done()
     } else {
-      // in the free login whitelist, go directly
       next()
     }
   }

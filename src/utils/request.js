@@ -1,70 +1,46 @@
 import axios from 'axios'
+import { dispatch } from '@/store'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-import {
-  dispatch
-} from '@/store'
-
-// create an axios instance
 const service = axios.create({
-  baseURL: import.meta.env.VITE_BASE_API, // url = base url + request url
-  // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 5000 // request timeout
+  baseURL: import.meta.env.VITE_BASE_API || 'http://127.0.0.1:8000/api/v1',
+  timeout: 5000
 })
 
 // request interceptor
 service.interceptors.request.use(
   config => {
-    // do something before request is sent
-
     const token = dispatch.user.getToken()
     if (token) {
-      // let each request carry token
-      // ['X-Token'] is a custom headers key
-      // please modify it according to the actual situation
-      config.headers['token'] = token
+      // jika backend pakai Bearer token
+      config.headers['Authorization'] = `Bearer ${token}`
     }
     return config
   },
-  error => {
-    // do something with request error
-    console.log(error) // for debug
-    return Promise.reject(error)
-  }
+  error => Promise.reject(error)
 )
 
 // response interceptor
 service.interceptors.response.use(
-  /**
-   * If you want to get http information such as headers or status
-   * Please return  response => response
-   */
-
-  /**
-   * Determine the request status by custom code
-   * Here is just an example
-   * You can also judge the status by HTTP Status Code
-   */
   response => {
     const res = response.data
-
-    // if the custom code is not 20000, it is judged as an error.
-    if (res.code !== 20000) {
+    if (res.code && res.code !== 20000) {
       ElMessage({
         message: res.message || 'Error',
         type: 'error',
-        duration: 5 * 1000
+        duration: 5000
       })
 
-      // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;
-      if (res.code === 50008 || res.code === 50012 || res.code === 50014) {
-        // to re-login
+      // jika token invalid / expired
+      if ([50008, 50012, 50014].includes(res.code)) {
         ElMessageBox.confirm(
           'You have been logged out, you can cancel to stay on this page, or log in again',
           'Confirm logout', {
             confirmButtonText: 'Re-Login',
             cancelButtonText: 'Cancel',
             type: 'warning'
-          }).then(() => {
+          }
+        ).then(() => {
           dispatch.user.removeToken()
           location.reload()
         })
@@ -75,11 +51,10 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err ' + error) // for debug
     ElMessage({
       message: error.message,
       type: 'error',
-      duration: 5 * 1000
+      duration: 5000
     })
     return Promise.reject(error)
   }
