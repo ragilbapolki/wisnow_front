@@ -75,4 +75,4 @@ npm run dev
 
 [MIT](https://github.com/chocho-1115/vue-admin/blob/main/LICENSE)
 
-Copyright (c) 2025 chocho-1115
+Copyright (c) 2025 chocho-1115# wisnow_front
