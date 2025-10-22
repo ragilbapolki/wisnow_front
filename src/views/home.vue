@@ -47,7 +47,7 @@
             <el-dropdown trigger="click" @command="handleCommand">
               <div class="el-dropdown-link user-info">
                 <img
-                  :src="user.avatar || '/default-avatar.png'"
+                  :src="user.avatar_url || '/default-avatar.png'"
                   :alt="user.name"
                   class="user-avatar"
                 />
@@ -58,7 +58,12 @@
               </div>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="profile">👤 Profil</el-dropdown-item>
+                  <router-link to="/profile">
+                    <el-dropdown-item>
+                      <el-icon class="mr-1"><i-ep-User /></el-icon>
+                      My Profile
+                    </el-dropdown-item>
+                  </router-link>
                   <el-dropdown-item command="profile">
                     <router-link to="/admin/dashboard">
                       🏛️ Admin Dashboard
@@ -205,27 +210,15 @@
         <!-- Logo and Tree -->
         <div class="logo-container">
           <div class="tree-illustration">
-            <!-- Stylized tree SVG -->
-            <svg viewBox="0 0 200 150" class="tree-svg">
-              <!-- Tree crown -->
-              <circle cx="100" cy="50" r="25" fill="#4ade80" opacity="0.8" />
-              <circle cx="85" cy="45" r="22" fill="#22c55e" opacity="0.9" />
-              <circle cx="115" cy="45" r="22" fill="#16a34a" opacity="0.9" />
-              <circle cx="100" cy="35" r="20" fill="#15803d" opacity="0.8" />
-              <!-- Tree trunk -->
-              <rect x="95" y="70" width="10" height="25" fill="#92400e" />
-              <!-- Ground -->
-              <ellipse cx="100" cy="95" rx="35" ry="5" fill="#166534" opacity="0.3" />
-            </svg>
+            <img src="@/assets/images/logo_kb.png" alt="Wismilak Logo" class="logo-img" />
           </div>
-          <h1 class="company-name">WISMILAK</h1>
         </div>
 
         <!-- Welcome Text -->
-        <h2 class="welcome-title">
+        <!-- <h2 class="welcome-title">
           Selamat Datang di <span class="highlight">WISMILAK</span><br />
           Knowledge Base
-        </h2>
+        </h2> -->
 
         <!-- Feature Cards -->
         <div class="feature-cards">
@@ -249,7 +242,7 @@
         </div>
 
         <!-- CTA Button -->
-        <router-link to="/articles" class="cta-button">
+        <!-- <router-link to="/articles" class="cta-button">
           Jelajahi Knowledge Base
           <svg class="cta-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -259,7 +252,7 @@
               d="M17 8l4 4m0 0l-4 4m4-4H3"
             ></path>
           </svg>
-        </router-link>
+        </router-link> -->
       </div>
     </section>
 
@@ -316,7 +309,7 @@
             <div class="article-footer">
               <div class="article-author">
                 <img
-                  :src="article.user?.avatar || '/default-avatar.png'"
+                  :src="article.user?.avatar_url || '/default-avatar.png'"
                   :alt="article.user?.name || 'Unknown'"
                   class="author-avatar"
                 />
@@ -490,21 +483,64 @@ const handleLogin = () => {
       loginLoading.value = true
       login(loginForm)
         .then((res) => {
-          dispatch.user.setToken(res.data.token)
+          console.log('✅ Login Response:', res.data)
+
+          // Get data from response
+          const responseData = res.data?.data || res.data
+          const token = responseData.token
+          const userData = responseData.user
+
+          // 1. Save token FIRST
+          if (token) {
+            localStorage.setItem('token', token)
+            dispatch.user.setToken(token)
+            console.log('✅ Token saved')
+          }
+
+          // 2. Save user data SECOND
+          if (userData) {
+            // Pastikan user punya role
+            if (!userData.role) {
+              userData.role = 'user' // default role
+            }
+
+            localStorage.setItem('user', JSON.stringify(userData))
+            console.log('💾 User saved:', userData)
+          }
+
+          // 3. Verify saved data
+          const verifyToken = localStorage.getItem('token')
+          const verifyUser = localStorage.getItem('user')
+          console.log('Verify - Token:', verifyToken ? 'exists' : 'not found')
+          console.log('Verify - User:', verifyUser)
+
           showLoginModal.value = false
           loginLoading.value = false
 
-          // Check redirect parameter
+          ElMessage.success('Login berhasil!')
+
+          // 4. Use window.location instead of router.push to ensure fresh state
+          const userRole = userData?.role
           const redirect = route.query.redirect
-          if (redirect && redirect !== '/') {
-            router.push(redirect)
-          } else {
-            // Tetap di home, hanya reload untuk refresh user info
-            window.location.reload()
-          }
+
+          // Wait untuk ensure localStorage saved
+          setTimeout(() => {
+            if (redirect && redirect !== '/') {
+              window.location.href = redirect
+            } else if (userRole === 'admin') {
+              window.location.href = '/admin/dashboard'
+            } else if (userRole === 'editor') {
+              window.location.href = '/admin/articles/list'
+            } else {
+              // Stay on home but reload to refresh user info
+              window.location.reload()
+            }
+          }, 200) // Small delay to ensure save completes
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('❌ Login error:', error)
           loginLoading.value = false
+          ElMessage.error(error.response?.data?.message || 'Login gagal')
         })
     } else {
       console.log('error submit!!')

@@ -3,6 +3,7 @@ import {
   createRouter,
   createWebHistory
 } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 import nestedRouter from './modules/nested'
 import Home from '@/views/Home.vue'
@@ -11,12 +12,15 @@ import ArticleList from '@/views/ArticleList.vue'
 
 import Layout from '@/layout/index.vue'
 import {
+  DataAnalysis,
   DocumentCopy,
   Grid,
   HelpFilled,
   Menu,
   Odometer,
-  Picture
+  OfficeBuilding,
+  Picture,
+  User
 } from '@element-plus/icons-vue'
 
 const router = createRouter({
@@ -32,6 +36,7 @@ const router = createRouter({
       path: '/',
       name: 'Home',
       component: Home,
+      hidden: true,
       meta: {
         title: 'Home',
         requiresAuth: false
@@ -53,7 +58,7 @@ const router = createRouter({
       component: Layout,
       redirect: '/admin/dashboard',
       meta: {
-        requiresAuth: true
+        requiresAuth: true,
       },
       children: [{
         path: 'dashboard',
@@ -61,10 +66,10 @@ const router = createRouter({
         component: () => import('@/views/dashboard.vue'),
         meta: {
           title: 'Dashboard',
-          icon: 'dashboard',
+          icon: DataAnalysis,
           keepAlive: true,
           affix: true,
-          requiresAuth: true
+          requiresAuth: true,
         }
       }]
     },
@@ -72,6 +77,7 @@ const router = createRouter({
       path: '/about',
       component: Layout,
       redirect: '/about/readme',
+      hidden: true,
       meta: {
         alwaysShow: true,
         title: 'About',
@@ -96,11 +102,12 @@ const router = createRouter({
     {
       path: '/example',
       component: Layout,
+      hidden: true,
       redirect: '/example/icon',
       meta: {
         alwaysShow: true,
         title: 'Example',
-        icon: Menu
+        icon: Menu,
       },
       children: [{
           path: 'icon',
@@ -150,9 +157,9 @@ const router = createRouter({
         },
       ]
     },
-    nestedRouter,
     {
       path: '/external-link',
+      hidden: true,
       component: Layout,
       children: [{
         path: 'https://github.com/chocho-1115/vue-admin',
@@ -162,14 +169,15 @@ const router = createRouter({
         }
       }]
     },
-    // Categories Management
+    // Categories Management - ADMIN ONLY
     {
       path: '/admin/categories',
       component: Layout,
       redirect: '/admin/categories/list',
       meta: {
         title: 'Categories',
-        icon: Grid
+        icon: Grid,
+        requiresAuth: true,
       },
       children: [
         {
@@ -177,7 +185,7 @@ const router = createRouter({
           name: 'CategoryList',
           component: () => import('@/views/category/index.vue'),
           meta: {
-            title: 'Category List',
+            title: 'Kategori',
             icon: Grid,
             breadcrumb: [
               { title: 'Categories', to: '/admin/categories/list' },
@@ -187,23 +195,100 @@ const router = createRouter({
         },
       ]
     },
-    // Articles Management
+    // Division Management - ADMIN ONLY
+    {
+      path: '/admin/divisi',
+      component: Layout,
+      redirect: '/admin/divisi/list',
+      meta: {
+        title: 'Division',
+        icon: OfficeBuilding, // ✅ Gunakan icon yang sudah di-import
+        requiresAuth: true,
+      },
+      children: [
+        {
+          path: 'list',
+          name: 'DivisionList',
+          component: () => import('@/views/division/DivisionManagement.vue'),
+          meta: {
+            title: 'Divisi / Departemen',
+            icon: OfficeBuilding,
+            breadcrumb: [
+              { title: 'Divisi', to: '/admin/division/list' },
+              { title: 'List' }
+            ]
+          }
+        },
+      ]
+    },
+    // Profile - All authenticated users
+    {
+      path: '/profile',
+      component: Layout,
+      redirect: '/profile/me',
+      meta: {
+        title: 'Profile',
+        requiresAuth: true
+      },
+      hidden: true,
+      children: [
+        {
+          path: 'me',
+          name: 'MyProfile',
+          component: () => import('@/views/Profile/MyProfile.vue'),
+          meta: {
+            title: 'My Profile',
+            requiresAuth: true
+          }
+        },
+      ]
+    },
+    // Users Management - ADMIN ONLY
+    {
+      path: '/admin/users',
+      component: Layout,
+      redirect: '/admin/users/list',
+      meta: {
+        title: 'Users',
+        icon: User,
+        requiresAuth: true,
+      },
+      children: [
+        {
+          path: 'list',
+          name: 'UserList',
+          component: () => import('@/views/user/userList.vue'),
+          meta: {
+            title: 'Users',
+            icon: User,
+            requiresAuth: true,
+            breadcrumb: [
+              { title: 'Users', to: '/admin/users/list' },
+              { title: 'List' }
+            ]
+          }
+        }
+      ]
+    },
+    // Articles Management - ADMIN & EDITOR
     {
       path: '/admin/articles',
       component: Layout,
       redirect: '/admin/articles/list',
       meta: {
         title: 'Articles',
-        icon: DocumentCopy
+        icon: DocumentCopy,
+        requiresAuth: true,
       },
       children: [
         {
           path: 'list',
-          name: 'ArticleList',
+          name: 'AdminArticleList',
           component: () => import('@/views/article/ArticleList.vue'),
           meta: {
             title: 'Article List',
             icon: DocumentCopy,
+            requiresAuth: true,
             breadcrumb: [
               { title: 'Articles', to: '/admin/articles/list' },
               { title: 'List' }
@@ -217,6 +302,7 @@ const router = createRouter({
           hidden: true,
           meta: {
             title: 'Create Article',
+            requiresAuth: true,
             breadcrumb: [
               { title: 'Articles', to: '/admin/articles/list' },
               { title: 'Create' }
@@ -230,6 +316,7 @@ const router = createRouter({
           hidden: true,
           meta: {
             title: 'Edit Article',
+            requiresAuth: true,
             breadcrumb: [
               { title: 'Articles', to: '/admin/articles/list' },
               { title: 'Edit' }
@@ -243,6 +330,7 @@ const router = createRouter({
           hidden: true,
           meta: {
             title: 'View Article',
+            requiresAuth: true,
             breadcrumb: [
               { title: 'Articles', to: '/admin/articles/list' },
               { title: 'View' }
@@ -256,13 +344,13 @@ const router = createRouter({
           hidden: true,
           meta: {
             title: 'Article Gallery',
-            icon: Picture,
+            requiresAuth: true,
             breadcrumb: [
               { title: 'Articles', to: '/admin/articles/list' },
               { title: 'Gallery' }
             ]
           }
-        }
+        },
       ]
     },
     // 404 Error Page
@@ -270,6 +358,15 @@ const router = createRouter({
       path: '/404',
       component: () => import('@/views/404.vue'),
       hidden: true
+    },
+    // 403 Forbidden Page
+    {
+      path: '/403',
+      component: () => import('@/views/404.vue'),
+      hidden: true,
+      meta: {
+        title: 'Access Denied'
+      }
     },
     // Catch all 404
     {
@@ -280,18 +377,16 @@ const router = createRouter({
   ],
 })
 
-// Navigation Guards
-router.beforeEach((to, from, next) => {
-  // Set page title
-  if (to.meta?.title) {
-    document.title = `${to.meta.title} - Admin Panel`
+// Helper function to check if user has required role
+function hasRequiredRole(userRole, requiredRoles) {
+  if (!requiredRoles || requiredRoles.length === 0) {
+    return true
   }
-
-  next()
-})
+  return requiredRoles.includes(userRole)
+}
 
 router.afterEach((to, from) => {
-  // Remove loading state
+  // Remove loading state if any
 })
 
 export const resetRouter = () => {

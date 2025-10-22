@@ -30,3 +30,72 @@ export function logout(token) {
     }
   })
 }
+
+export function getAdminUsers(params) {
+  return request({
+    url: '/admin/users',
+    method: 'get',
+    params
+  })
+}
+
+// Get single user
+export function getAdminUser(id) {
+  return request({
+    url: `/admin/users/${id}`,
+    method: 'get'
+  })
+}
+
+// Create user
+export function createAdminUser(data) {
+  return request({
+    url: '/admin/users',
+    method: 'post',
+    data
+  })
+}
+
+// Update user
+export function updateAdminUser(id, data) {
+  return request({
+    url: `/admin/users/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+// Delete user
+export function deleteAdminUser(id) {
+  return request({
+    url: `/admin/users/${id}`,
+    method: 'delete'
+  })
+}
+
+// Upload avatar
+export function uploadUserAvatar(id, formData) {
+  return request({
+    url: `/admin/users/${id}/avatar`,
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+// Delete avatar
+export function deleteUserAvatar(id) {
+  return request({
+    url: `/admin/users/${id}/avatar`,
+    method: 'delete'
+  })
+}
+
+export function getPenulis() {
+  return request({
+    url: '/users/penulis',
+    method: 'get'
+  })
+}

@@ -1,5 +1,4 @@
-
-<!-- ArticleDetailNew.vue -->
+<!-- ArtikelDetail.vue - Complete Version with Access Control -->
 <template>
   <div class="article-detail-page">
     <header class="main-header">
@@ -13,27 +12,65 @@
 
         <div class="header-actions">
           <div v-if="isAuthenticated" class="user-menu">
-            <div class="user-info">
-              <img
-                :src="user.avatar || '/default-avatar.png'"
-                :alt="user.name"
-                class="user-avatar"
-              />
-              <span class="user-name">{{ user.name }}</span>
-              <div class="user-dropdown">
-                <router-link v-if="user.role === 'admin'" to="/admin/dashboard" class="dropdown-item">
-                  🏛️ Admin Dashboard
-                </router-link>
-                <a href="#" @click.prevent="handleLogout" class="dropdown-item"> 🚪 Logout </a>
+            <el-dropdown trigger="click" @command="handleCommand">
+              <div class="el-dropdown-link user-info">
+                <img
+                  :src="user.avatar_url || '/default-avatar.png'"
+                  :alt="user.name"
+                  class="user-avatar"
+                />
+                <span class="user-name">{{ user.name }}</span>
+                <el-icon class="el-icon--right">
+                  <arrow-down />
+                </el-icon>
               </div>
-            </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="profile">👤 Profil</el-dropdown-item>
+                  <el-dropdown-item command="profile">
+                    <router-link to="/admin/dashboard">
+                      🏛️ Admin Dashboard
+                    </router-link>
+                  </el-dropdown-item>
+                  <el-dropdown-item @click.native="onLogout" divided>🚪 Logout</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            <!-- <el-dropdown trigger="click">
+            <el-button type="primary">
+              <span class="el-dropdown-link user-info">
+                <img
+                  :src="user.avatar || '/default-avatar.png'"
+                  :alt="user.name"
+                  class="user-avatar"
+                />
+                <span class="user-name">{{ user.name }}</span>
+              </span><el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item v-if="user.role === 'admin'">
+                    <router-link to="/admin/dashboard" class="dropdown-link">
+                      🏛️ Admin Dashboard
+                    </router-link>
+                  </el-dropdown-item>
+
+                  <el-dropdown-item divided @click="handleLogout">
+                    🚪 Logout
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown> -->
           </div>
-          <button v-else @click="openLoginModal" class="login-button">Login</button>
+
+          <button v-else @click="openLoginModal" class="login-button">
+            Login
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- Breadcrumb -->
     <div class="breadcrumb-container">
       <div class="breadcrumb-content">
         <router-link to="/" class="breadcrumb-link">Beranda</router-link>
@@ -55,6 +92,47 @@
       <div class="spinner"></div>
     </div>
 
+    <!-- Access Denied State -->
+    <div v-else-if="accessDenied" class="access-denied-container">
+      <div class="access-denied-card">
+        <div class="access-denied-icon">
+          <svg width="80" height="80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+        </div>
+        <h2>Akses Ditolak</h2>
+        <p class="access-denied-message">{{ accessDeniedMessage }}</p>
+
+        <!-- Show allowed divisions/departments if available -->
+        <div v-if="deniedArticleInfo" class="access-info">
+          <p class="access-info-title">Artikel ini hanya dapat diakses oleh:</p>
+          <div class="access-tags">
+            <div v-if="deniedArticleInfo.divisions && deniedArticleInfo.divisions.length > 0" class="tag-group">
+              <span class="tag-label">Divisi:</span>
+              <span v-for="div in deniedArticleInfo.divisions" :key="div.id" class="access-tag">
+                {{ div.name }}
+              </span>
+            </div>
+            <div v-if="deniedArticleInfo.departments && deniedArticleInfo.departments.length > 0" class="tag-group">
+              <span class="tag-label">Departemen:</span>
+              <span v-for="dept in deniedArticleInfo.departments" :key="dept.id" class="access-tag">
+                {{ dept.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="access-denied-actions">
+          <button v-if="!isAuthenticated" @click="openLoginModal" class="btn-primary">
+            Login untuk Melanjutkan
+          </button>
+          <button @click="goBack" class="btn-secondary">
+            Kembali ke Beranda
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Article Content -->
     <div v-else-if="article" class="content-wrapper">
       <div class="content-container">
@@ -66,6 +144,14 @@
               {{ article.type }}
             </span>
             <span class="category-badge">{{ article.category?.name }}</span>
+
+            <!-- Private Badge -->
+            <span v-if="article.visibility === 'private'" class="visibility-badge private">
+              🔒 Private
+            </span>
+            <span v-else class="visibility-badge public">
+              🌐 Public
+            </span>
           </div>
 
           <h1 class="article-title">{{ article.title }}</h1>
@@ -73,7 +159,7 @@
           <!-- Author Info -->
           <div class="author-section">
             <img
-              :src="article.user?.avatar || '/default-avatar.png'"
+              :src="article.user?.avatar_url || '/default-avatar.png'"
               :alt="article.user?.name"
               class="author-avatar"
             />
@@ -138,12 +224,12 @@
                     <span v-if="article.attachment_size">{{ formatFileSize(article.attachment_size) }}</span>
                   </div>
                 </div>
-                <el-button @click="downloadAttachment" type="danger" size="small">
+                <button @click="downloadAttachment" class="btn-download">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                   </svg>
                   Download
-                </el-button>
+                </button>
               </div>
 
               <!-- PDF Preview -->
@@ -181,9 +267,7 @@
           </div>
 
           <!-- Article Content -->
-          <div class="article-content">
-            <div v-html="article.content"></div>
-          </div>
+          <div class="article-content" ref="articleContentRef" v-html="article.content"></div>
 
           <!-- Rating Section -->
           <div class="rating-section">
@@ -201,7 +285,7 @@
 
           <!-- Comments Section -->
           <div class="comments-section">
-            <h2 class="section-title">Komentar ({{ article.ratings?.length || 3 }})</h2>
+            <h2 class="section-title">Komentar ({{ article.ratings?.length || 0 }})</h2>
 
             <div class="comment-form" v-if="isAuthenticated">
               <textarea
@@ -217,6 +301,10 @@
               >
                 {{ submittingRating ? 'Mengirim...' : 'Kirim Komentar' }}
               </button>
+            </div>
+
+            <div v-else class="login-prompt">
+              <p>Silakan <a href="#" @click.prevent="openLoginModal">login</a> untuk memberikan komentar</p>
             </div>
 
             <div class="comments-list">
@@ -293,8 +381,41 @@
                 <span class="info-label">Penulis</span>
                 <span class="info-value">{{ article.user?.name }}</span>
               </div>
+              <div class="info-item">
+                <span class="info-label">Visibilitas</span>
+                <span class="info-value">
+                  <span v-if="article.visibility === 'private'" class="visibility-text private">
+                    🔒 Private
+                  </span>
+                  <span v-else class="visibility-text public">
+                    🌐 Public
+                  </span>
+                </span>
+              </div>
             </div>
-            <button class="btn-history">Lihat Riwayat Perubahan</button>
+          </div>
+
+          <!-- Access Info (for private articles) -->
+          <div v-if="article.visibility === 'private'" class="sidebar-card access-card">
+            <h3 class="sidebar-title">Akses Terbatas</h3>
+            <div class="access-list">
+              <div v-if="article.divisions && article.divisions.length > 0" class="access-group">
+                <span class="access-group-label">Divisi:</span>
+                <div class="access-items">
+                  <span v-for="div in article.divisions" :key="div.id" class="access-item">
+                    {{ div.name }}
+                  </span>
+                </div>
+              </div>
+              <div v-if="article.departments && article.departments.length > 0" class="access-group">
+                <span class="access-group-label">Departemen:</span>
+                <div class="access-items">
+                  <span v-for="dept in article.departments" :key="dept.id" class="access-item">
+                    {{ dept.name }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
       </div>
@@ -326,12 +447,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getArticleBySlug, rateArticle } from '@/api/article'
-import { getArticleGallery } from '@/api/article'
+import { getArticleBySlug, rateArticle, getArticleGallery } from '@/api/article'
 import { ElMessage } from 'element-plus'
 import { dispatch, ctx } from '@/store'
+
+// Import highlight.js
+import hljs from 'highlight.js'
+import 'highlight.js/styles/atom-one-dark.css'
+
+// Register languages
+import javascript from 'highlight.js/lib/languages/javascript'
+import python from 'highlight.js/lib/languages/python'
+import php from 'highlight.js/lib/languages/php'
+import xml from 'highlight.js/lib/languages/xml'
+import sql from 'highlight.js/lib/languages/sql'
+import css from 'highlight.js/lib/languages/css'
+import json from 'highlight.js/lib/languages/json'
+import bash from 'highlight.js/lib/languages/bash'
+
+hljs.registerLanguage('javascript', javascript)
+hljs.registerLanguage('python', python)
+hljs.registerLanguage('php', php)
+hljs.registerLanguage('html', xml)
+hljs.registerLanguage('xml', xml)
+hljs.registerLanguage('sql', sql)
+hljs.registerLanguage('css', css)
+hljs.registerLanguage('json', json)
+hljs.registerLanguage('bash', bash)
 
 const route = useRoute()
 const router = useRouter()
@@ -343,6 +487,12 @@ const relatedArticles = ref([])
 const galleryImages = ref([])
 const galleryModalOpen = ref(false)
 const currentGalleryIndex = ref(0)
+const articleContentRef = ref(null)
+
+// Access denied state
+const accessDenied = ref(false)
+const accessDeniedMessage = ref('')
+const deniedArticleInfo = ref(null)
 
 // Rating state
 const userRating = ref({
@@ -350,6 +500,202 @@ const userRating = ref({
   comment: ''
 })
 const submittingRating = ref(false)
+
+// Detect if text is code
+const isCodeLike = (text) => {
+  const codePatterns = [
+    /var\s+\w+\s*=/,
+    /const\s+\w+\s*=/,
+    /let\s+\w+\s*=/,
+    /function\s+\w+/,
+    /=>\s*{/,
+    /L\.map\(/,
+    /L\.control\(/,
+    /\.onAdd\s*=/,
+    /this\.\w+/,
+    /return\s+/,
+    /<[\w]+[^>]*>/,
+    /\{[\s\S]*\}/,
+    /<\?php/,
+    /SELECT.*FROM/i,
+    /def\s+\w+\(/,
+    /import\s+/
+  ]
+
+  return codePatterns.some(pattern => pattern.test(text))
+}
+
+// Auto-detect programming language
+const detectLanguage = (text) => {
+  if (text.includes('<?php')) return 'php'
+  if (text.match(/SELECT.*FROM/i) || text.includes('INSERT INTO')) return 'sql'
+  if (text.includes('def ') && text.includes('import ')) return 'python'
+  if (text.includes('<html') || text.includes('<!DOCTYPE') || text.includes('<div')) return 'html'
+  if (text.includes('function') || text.includes('const ') || text.includes('let ') || text.includes('var ')) return 'javascript'
+  if (text.includes('{') && text.includes('}') && text.includes(':')) return 'json'
+  if (text.includes('#!/bin/bash') || text.includes('sudo ') || text.includes('apt-get')) return 'bash'
+
+  return 'javascript'
+}
+
+// Convert plain text code to formatted code block
+const convertToCodeBlock = (element) => {
+  const text = element.textContent.trim()
+  const pre = document.createElement('pre')
+  pre.classList.add('code-block-converted')
+  const code = document.createElement('code')
+  code.textContent = text
+  const language = detectLanguage(text)
+  code.className = `language-${language}`
+  pre.setAttribute('data-language', language)
+  pre.appendChild(code)
+  element.replaceWith(pre)
+  return pre
+}
+
+// Highlight code blocks function
+const highlightCodeBlocks = () => {
+  if (!articleContentRef.value) {
+    console.warn('⏳ articleContentRef not ready, retrying...')
+    setTimeout(highlightCodeBlocks, 100)
+    return
+  }
+
+  console.log('🎨 Starting code highlighting...')
+
+  const preElements = articleContentRef.value.querySelectorAll('pre')
+  console.log(`Found ${preElements.length} pre elements`)
+
+  preElements.forEach((pre, index) => {
+    if (pre.classList.contains('code-highlighted')) {
+      return
+    }
+
+    pre.classList.add('code-highlighted')
+    pre.classList.remove('ql-syntax')
+
+    let code = pre.querySelector('code')
+    if (!code) {
+      code = document.createElement('code')
+      const content = pre.textContent
+      code.textContent = content
+      pre.innerHTML = ''
+      pre.appendChild(code)
+    }
+
+    const language = detectLanguage(code.textContent)
+    code.className = `language-${language}`
+    pre.setAttribute('data-language', language)
+
+    try {
+      hljs.highlightElement(code)
+      console.log(`✅ Highlighted pre block ${index + 1} (${language})`)
+    } catch (error) {
+      console.error(`Error highlighting block ${index + 1}:`, error)
+    }
+
+    if (!pre.querySelector('.code-copy-btn')) {
+      addCopyButton(pre, code)
+    }
+  })
+
+  const textElements = articleContentRef.value.querySelectorAll('p, div:not(.article-content)')
+
+  textElements.forEach((element, index) => {
+    if (element.closest('pre') || element.classList.contains('code-checked')) {
+      return
+    }
+
+    element.classList.add('code-checked')
+    const text = element.textContent.trim()
+
+    if (isCodeLike(text) && text.length > 10) {
+      console.log(`📝 Converting text element ${index + 1} to code block`)
+      const pre = convertToCodeBlock(element)
+
+      const code = pre.querySelector('code')
+      if (code) {
+        try {
+          hljs.highlightElement(code)
+          console.log(`✅ Highlighted converted block ${index + 1}`)
+        } catch (error) {
+          console.error(`Error highlighting converted block:`, error)
+        }
+
+        if (!pre.querySelector('.code-copy-btn')) {
+          addCopyButton(pre, code)
+        }
+      }
+    }
+  })
+}
+const addCopyButton = (pre, code) => {
+  const button = document.createElement('button')
+  button.className = 'code-copy-btn'
+  button.innerHTML = `
+    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+      </path>
+    </svg>
+    <span>Copy</span>
+  `
+
+  button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(code.textContent)
+      button.innerHTML = `
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span>Copied!</span>
+      `
+      button.classList.add('copied')
+      ElMessage.success('Code copied!')
+
+      setTimeout(() => {
+        button.innerHTML = `
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+            </path>
+          </svg>
+          <span>Copy</span>
+        `
+        button.classList.remove('copied')
+      }, 2000)
+    } catch (error) {
+      ElMessage.error('Failed to copy')
+    }
+  })
+
+  pre.appendChild(button)
+}
+
+// Check if user can access private article
+const canAccessPrivateArticle = (articleData) => {
+  if (articleData.visibility === 'public') {
+    return true
+  }
+
+  if (!isAuthenticated.value) {
+    return false
+  }
+
+  const currentUser = user.value
+
+  if (currentUser.role === 'admin') {
+    return true
+  }
+
+  const allowedDivisions = articleData.divisions?.map(d => d.id) || []
+  const hasDivisionAccess = allowedDivisions.includes(currentUser.divisi_id)
+
+  const allowedDepartments = articleData.departments?.map(d => d.id) || []
+  const hasDepartmentAccess = allowedDepartments.includes(currentUser.departemen_id)
+
+  return hasDivisionAccess || hasDepartmentAccess
+}
 
 const formatDate = (dateString) => {
   if (!dateString) return '-'
@@ -412,11 +758,7 @@ const submitRating = async () => {
     })
 
     ElMessage.success('Penilaian berhasil disimpan')
-
-    // Reload article to get updated ratings
     await loadArticle()
-
-    // Reset form
     userRating.value = { rating: 5, comment: '' }
   } catch (error) {
     console.error('Error submitting rating:', error)
@@ -454,7 +796,7 @@ const copyToClipboard = () => {
 }
 
 const goBack = () => {
-  router.back()
+  router.push('/')
 }
 
 const handleLogout = async () => {
@@ -498,31 +840,70 @@ const downloadAttachment = () => {
 }
 
 const openLoginModal = () => {
-  // Implement login modal
   router.push('/login')
 }
 
 const loadArticle = async () => {
   loading.value = true
+  accessDenied.value = false
+  deniedArticleInfo.value = null
+
   try {
     const response = await getArticleBySlug(route.params.slug)
-    console.info(response);
+    console.info(response)
     const data = response.data || response
+
+    if (response.success === false && response.message) {
+      accessDenied.value = true
+      accessDeniedMessage.value = response.message
+      loading.value = false
+      return
+    }
+
     article.value = data.article
+
+    // Check access permission
+    if (!canAccessPrivateArticle(article.value)) {
+      accessDenied.value = true
+      deniedArticleInfo.value = {
+        divisions: article.value.divisions || [],
+        departments: article.value.departments || []
+      }
+
+      if (!isAuthenticated.value) {
+        accessDeniedMessage.value = 'Artikel ini bersifat private. Silakan login untuk mengakses.'
+      } else {
+        accessDeniedMessage.value = 'Anda tidak memiliki akses ke artikel ini. Artikel ini hanya dapat diakses oleh divisi atau departemen tertentu.'
+      }
+
+      loading.value = false
+      return
+    }
+
     relatedArticles.value = data.related_articles || []
 
-    // Map gallery from API
     if (article.value && article.value.gallery) {
       article.value.galleries = article.value.gallery
     }
 
-    // Load gallery images
     if (article.value?.id) {
       await loadGallery()
     }
+
+    await nextTick()
+    setTimeout(() => {
+      highlightCodeBlocks()
+    }, 200)
+
   } catch (error) {
     console.error('Error loading article:', error)
-    ElMessage.error('Gagal memuat artikel')
+
+    if (error.response?.status === 403) {
+      accessDenied.value = true
+      accessDeniedMessage.value = error.response.data?.message || 'Anda tidak memiliki akses ke artikel ini.'
+    } else {
+      ElMessage.error('Gagal memuat artikel')
+    }
   } finally {
     loading.value = false
   }
@@ -726,6 +1107,128 @@ onMounted(() => {
   to { transform: rotate(360deg); }
 }
 
+/* Access Denied */
+.access-denied-container {
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 2rem;
+}
+
+.access-denied-card {
+  background: white;
+  border-radius: 0.5rem;
+  padding: 3rem;
+  text-align: center;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.access-denied-icon {
+  color: #f59e0b;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.access-denied-card h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.access-denied-message {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.access-info {
+  background: #fef9e7;
+  border: 1px solid #fde68a;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.access-info-title {
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.access-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.tag-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #78350f;
+  min-width: 100px;
+}
+
+.access-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: white;
+  border: 1px solid #fbbf24;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.access-denied-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.5rem;
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.875rem;
+}
+
+.btn-primary:hover {
+  background: #1f2937;
+}
+
+.btn-secondary {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+
+.btn-secondary:hover {
+  background: #f9fafb;
+}
+
 /* Content */
 .content-wrapper {
   max-width: 1400px;
@@ -750,6 +1253,8 @@ onMounted(() => {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .article-badge {
@@ -792,6 +1297,25 @@ onMounted(() => {
   font-size: 0.75rem;
   font-weight: 500;
   color: #374151;
+}
+
+.visibility-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.visibility-badge.private {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.visibility-badge.public {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
 }
 
 .article-title {
@@ -888,8 +1412,8 @@ onMounted(() => {
   height: 1.125rem;
 }
 
-/* Gallery */
-.gallery-section {
+/* Attachment Section */
+.attachment-section {
   margin-bottom: 2rem;
 }
 
@@ -898,6 +1422,73 @@ onMounted(() => {
   font-weight: 600;
   margin-bottom: 1rem;
   color: #111827;
+}
+
+.attachment-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.attachment-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.attachment-icon {
+  color: #dc2626;
+}
+
+.attachment-info {
+  flex: 1;
+}
+
+.attachment-name {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.attachment-meta {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.btn-download {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-download:hover {
+  background: #b91c1c;
+}
+
+.pdf-preview {
+  height: 600px;
+}
+
+.pdf-iframe {
+  width: 100%;
+  height: 100%;
+}
+
+/* Gallery */
+.gallery-section {
+  margin-bottom: 2rem;
 }
 
 .gallery-grid {
@@ -1079,29 +1670,120 @@ onMounted(() => {
   margin: 1.5rem 0;
 }
 
-.article-content :deep(code) {
-  background: #f3f4f6;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-family: monospace;
-  font-size: 0.875rem;
-}
-
-.article-content :deep(pre) {
-  background: #1f2937;
-  color: #f3f4f6;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  overflow-x: auto;
-  margin: 1rem 0;
-}
-
 .article-content :deep(blockquote) {
   border-left: 4px solid #e5e7eb;
   padding-left: 1rem;
   margin: 1rem 0;
   color: #6b7280;
   font-style: italic;
+}
+
+/* CODE BLOCK STYLES */
+.article-content :deep(pre) {
+  position: relative;
+  background: #282c34 !important;
+  border-radius: 8px;
+  padding: 3rem 1.5rem 1.5rem 1.5rem !important;
+  overflow-x: auto;
+  margin: 2rem 0;
+  border: 1px solid #3e4451;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.article-content :deep(pre code) {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #abb2bf !important;
+  background: transparent !important;
+  padding: 0 !important;
+  display: block;
+  white-space: pre;
+  word-wrap: normal;
+  word-break: normal;
+  tab-size: 2;
+}
+
+.article-content :deep(pre[data-language]::before) {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.75rem;
+  left: 1rem;
+  background: rgba(97, 175, 239, 0.2);
+  border: 1px solid rgba(97, 175, 239, 0.3);
+  color: #61afef;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.article-content :deep(.code-copy-btn) {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #abb2bf;
+  font-size: 0.75rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.article-content :deep(.code-copy-btn:hover) {
+  background: rgba(255, 255, 255, 0.2);
+  color: #61afef;
+  border-color: rgba(97, 175, 239, 0.5);
+  transform: translateY(-1px);
+}
+
+.article-content :deep(.code-copy-btn.copied) {
+  background: rgba(152, 195, 121, 0.2);
+  color: #98c379;
+  border-color: rgba(152, 195, 121, 0.5);
+}
+
+.article-content :deep(code:not(pre code)) {
+  background: #f6f8fa;
+  color: #e83e8c;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.9em;
+  border: 1px solid #e1e4e8;
+  font-weight: 500;
+}
+
+.article-content :deep(pre)::-webkit-scrollbar {
+  height: 8px;
+}
+
+.article-content :deep(pre)::-webkit-scrollbar-track {
+  background: #21252b;
+  border-radius: 4px;
+}
+
+.article-content :deep(pre)::-webkit-scrollbar-thumb {
+  background: #4b5263;
+  border-radius: 4px;
+}
+
+.article-content :deep(pre)::-webkit-scrollbar-thumb:hover {
+  background: #5c6370;
+}
+
+.article-content :deep(pre:hover) {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* Rating Section */
@@ -1114,29 +1796,6 @@ onMounted(() => {
 
 .rating-display {
   text-align: left;
-}
-
-.rating-stars-large {
-  display: flex;
-  gap: 0.25rem;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.star-large {
-  cursor: pointer;
-  color: #fbbf24;
-  transition: color 0.2s;
-}
-
-.star-large:not(.active) {
-  color: #fbbf24;
-}
-
-.rating-text {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
 }
 
 /* Comments Section */
@@ -1234,6 +1893,10 @@ onMounted(() => {
 .comment-date {
   font-size: 0.75rem;
   color: #9ca3af;
+}
+
+.comment-rating {
+  margin-bottom: 0.5rem;
 }
 
 .comment-text {
@@ -1336,25 +1999,6 @@ onMounted(() => {
   color: #111827;
 }
 
-.btn-history {
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.625rem;
-  background: white;
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-history:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
-}
-
 /* Error State */
 .error-container {
   max-width: 1400px;
@@ -1423,8 +2067,18 @@ onMounted(() => {
     width: 100%;
     justify-content: center;
   }
+
+  .article-content :deep(pre) {
+    padding: 2.5rem 1rem 1rem 1rem !important;
+    font-size: 13px;
+  }
+
+  .article-content :deep(.code-copy-btn span) {
+    display: none;
+  }
 }
 
+/* Print */
 @media print {
   .main-header,
   .breadcrumb-container,
@@ -1432,7 +2086,9 @@ onMounted(() => {
   .rating-section,
   .comments-section,
   .sidebar,
-  .gallery-modal {
+  .gallery-modal,
+  .article-content :deep(.code-copy-btn),
+  .article-content :deep(pre[data-language]::before) {
     display: none !important;
   }
 
@@ -1443,6 +2099,11 @@ onMounted(() => {
   .main-content {
     box-shadow: none;
     padding: 0;
+  }
+
+  .article-content :deep(pre) {
+    page-break-inside: avoid;
+    border: 1px solid #ddd;
   }
 }
 </style>

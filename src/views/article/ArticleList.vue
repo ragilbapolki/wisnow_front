@@ -2,8 +2,8 @@
   <div class="app-container">
     <!-- Filter Section -->
     <div class="filter-container mb-4">
-      <el-row :gutter="20">
-        <el-col :span="5">
+      <el-row :gutter="15">
+        <el-col :span="8">
           <el-input
             v-model="filters.search"
             placeholder="Search by title"
@@ -15,10 +15,10 @@
             </template>
           </el-input>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <el-select
             v-model="filters.status"
-            placeholder="Filter by status"
+            placeholder="Status"
             clearable
             @change="handleFilter"
           >
@@ -29,7 +29,7 @@
         <el-col :span="4">
           <el-select
             v-model="filters.category_id"
-            placeholder="Filter by category"
+            placeholder="Category"
             clearable
             @change="handleFilter"
           >
@@ -41,10 +41,10 @@
             />
           </el-select>
         </el-col>
-        <el-col :span="4">
+        <el-col :span="3">
           <el-select
             v-model="filters.type"
-            placeholder="Filter by type"
+            placeholder="Type"
             clearable
             @change="handleFilter"
           >
@@ -53,10 +53,27 @@
             <el-option label="Panduan" value="Panduan" />
           </el-select>
         </el-col>
-        <el-col :span="4">
-          <el-button type="primary" @click="goToCreate">
+        <!-- <el-col :span="4">
+          <el-select
+            v-model="filters.penulis"
+            placeholder="Penulis"
+            clearable
+            filterable
+            @change="handleFilter"
+          >
+            <el-option
+              v-for="penulis in penulis"
+              :key="penulis.id"
+              :label="penulis.name"
+              :value="penulis.id"
+            />
+          </el-select>
+        </el-col> -->
+
+        <el-col :span="2">
+          <el-button type="primary" @click="goToCreate" style="width: 100%">
             <el-icon><Plus /></el-icon>
-            Add New
+            Add
           </el-button>
         </el-col>
       </el-row>
@@ -160,6 +177,7 @@
         v-model:current-page="pagination.currentPage"
         v-model:page-size="pagination.pageSize"
         :page-sizes="[10, 15, 20, 30, 50]"
+        :pager-count="5"
         :total="pagination.total"
         layout="total, sizes, prev, pager, next, jumper"
         @size-change="handleSizeChange"
@@ -211,8 +229,10 @@ import { onMounted, reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Edit, View, Delete, Picture, WarningFilled } from '@element-plus/icons-vue'
-import { getAdminArticles, deleteAdminArticle } from '@/api/article'
-import { getAdminCategories } from '@/api/category'
+import { getEditorArticles, deleteAdminArticle } from '@/api/article'
+
+import { getCategories } from '@/api/article'
+import { getPenulis } from '@/api/user'
 
 const router = useRouter()
 
@@ -226,6 +246,9 @@ const table = reactive({
 // Categories
 const categories = ref([])
 
+// Authors
+const penulis = ref([])
+
 // Delete dialog state
 const deleteDialogVisible = ref(false)
 const deleteLoading = ref(false)
@@ -236,7 +259,9 @@ const filters = reactive({
   search: '',
   status: '',
   category_id: '',
-  type: ''
+  type: '',
+  penulis: '',
+  editor_id: ''
 })
 
 // Pagination
@@ -346,13 +371,25 @@ const handleCurrentChange = (val) => {
 
 const fetchCategories = async () => {
   try {
-    const response = await getAdminCategories()
+    const response = await getCategories()
     if (response.success !== false) {
       categories.value = response.data || response || []
     }
   } catch (error) {
     console.error('Fetch categories error:', error)
     categories.value = []
+  }
+}
+
+const fetchAuthors = async () => {
+  try {
+    const response = await getPenulis()
+    if (response.success !== false) {
+      penulis.value = response.data || response || []
+    }
+  } catch (error) {
+    console.error('Fetch authors error:', error)
+    authors.value = []
   }
 }
 
@@ -366,7 +403,8 @@ const fetchData = async () => {
       search: filters.search || undefined,
       status: filters.status || undefined,
       category_id: filters.category_id || undefined,
-      type: filters.type || undefined
+      type: filters.type || undefined,
+      penulis: filters.penulis || undefined
     }
 
     // Remove undefined values
@@ -376,7 +414,7 @@ const fetchData = async () => {
       }
     })
 
-    const response = await getAdminArticles(params)
+    const response = await getEditorArticles(params)
 
     // Handle nested data structure: response.data.data
     if (response.success && response.data) {
@@ -424,6 +462,7 @@ const refreshData = async () => {
 
 onMounted(async () => {
   await fetchCategories()
+  await fetchAuthors()
   await fetchData()
 })
 
@@ -531,6 +570,49 @@ defineExpose({
 
 :deep(.el-button + .el-button) {
   margin-left: 8px;
+}
+
+/* Custom pagination styles */
+:deep(.el-pagination) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+:deep(.el-pagination .btn-prev),
+:deep(.el-pagination .btn-next) {
+  border-radius: 6px;
+  border: 1px solid #dcdfe6;
+  transition: all 0.3s;
+}
+
+:deep(.el-pagination .btn-prev:hover),
+:deep(.el-pagination .btn-next:hover) {
+  color: #409eff;
+  border-color: #409eff;
+}
+
+:deep(.el-pagination .el-pager li) {
+  border-radius: 6px;
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  transition: all 0.3s;
+  border: 1px solid transparent;
+}
+
+:deep(.el-pagination .el-pager li:hover) {
+  color: #409eff;
+  border-color: #409eff;
+}
+
+:deep(.el-pagination .el-pager li.is-active) {
+  background: linear-gradient(135deg, #409eff 0%, #66b1ff 100%);
+  color: white;
+  border-color: #409eff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
 }
 
 .mb-4 {

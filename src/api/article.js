@@ -10,6 +10,17 @@ export function getAdminArticles(params) {
   })
 }
 
+export function getEditorArticles(params) {
+  return request({
+    url: '/editor/articles',
+    method: 'get',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    },
+    params,
+  })
+}
+
 export function getAdminArticle(id) {
   return request({
     url: `/admin/articles/${id}`,
@@ -131,7 +142,10 @@ export function getArticles(params) {
 export function getArticle(slug) {
   return request({
     url: `/articles/${slug}`,
-    method: 'get'
+    method: 'get',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
   })
 }
 

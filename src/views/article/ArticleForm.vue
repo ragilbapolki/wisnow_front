@@ -1,6 +1,5 @@
-const fetchArticleImages = async (articleId) => {
-  try {
-    const<template>
+<!-- ArtikelForm.vue - Complete with Table Support -->
+<template>
   <div class="app-container">
     <!-- Header -->
     <div class="page-header">
@@ -59,18 +58,13 @@ const fetchArticleImages = async (articleId) => {
 
             <el-form-item label="Content" prop="content">
               <div class="editor-container">
-                <el-text size="small" type="info">
-                  <quill-editor
-                    v-model:content="article.content"
-                    style="height: 250px"
-                    :toolbar="[
-                      ['bold', 'italic', 'underline'],
-                      [{ list: 'ordered' }, { list: 'bullet' }],
-                      [{ align: [] }],
-                      ['clean']
-                    ]"
-                  />
-                </el-text>
+                <quill-editor
+                  ref="quillEditorRef"
+                  v-model:content="article.content"
+                  contentType="html"
+                  style="height: 400px"
+                  :options="editorOptions"
+                />
               </div>
             </el-form-item>
 
@@ -116,13 +110,6 @@ const fetchArticleImages = async (articleId) => {
                         size="small"
                         @blur="updateImageCaption(image)"
                       />
-                      <el-input
-                        v-model="image.alt_text"
-                        placeholder="Enter alt text..."
-                        size="small"
-                        @blur="updateImageCaption(image)"
-                        style="margin-top: 8px;"
-                      />
                       <div class="gallery-card-actions">
                         <el-button
                           type="danger"
@@ -137,14 +124,6 @@ const fetchArticleImages = async (articleId) => {
                   </div>
                 </div>
               </div>
-            </el-form-item>
-
-            <el-form-item label="Document Type">
-              <el-input
-                v-model="article.document_type"
-                placeholder="Enter document type (optional)"
-                maxlength="100"
-              />
             </el-form-item>
 
             <el-form-item label="PDF Attachment">
@@ -256,6 +235,68 @@ const fetchArticleImages = async (articleId) => {
                 </el-radio-group>
               </el-form-item>
 
+              <!-- Visibility Section -->
+              <el-divider content-position="left">Visibility Settings</el-divider>
+
+              <el-form-item label="Visibility" prop="visibility">
+                <el-radio-group v-model="article.visibility" style="width: 100%">
+                  <el-radio-button label="public" style="width: 50%">
+                    <el-icon><UserFilled /></el-icon>
+                    Public
+                  </el-radio-button>
+                  <el-radio-button label="private" style="width: 50%">
+                    <el-icon><Lock /></el-icon>
+                    Private
+                  </el-radio-button>
+                </el-radio-group>
+              </el-form-item>
+
+              <!-- Show divisions and departments if private -->
+              <div v-if="article.visibility === 'private'" class="access-control">
+                <el-alert
+                  title="Private Article"
+                  type="warning"
+                  description="This article will only be accessible to selected divisions and departments"
+                  :closable="false"
+                  show-icon
+                  style="margin-bottom: 16px;"
+                />
+
+                <el-form-item label="Divisions" prop="divisions">
+                  <el-select
+                    v-model="article.divisions"
+                    placeholder="Select divisions"
+                    style="width: 100%"
+                    multiple
+                    filterable
+                  >
+                    <el-option
+                      v-for="division in divisions"
+                      :key="division.id"
+                      :label="division.name"
+                      :value="division.id"
+                    />
+                  </el-select>
+                </el-form-item>
+
+                <el-form-item label="Departments" prop="departments">
+                  <el-select
+                    v-model="article.departments"
+                    placeholder="Select departments"
+                    style="width: 100%"
+                    multiple
+                    filterable
+                  >
+                    <el-option
+                      v-for="department in departments"
+                      :key="department.id"
+                      :label="`${department.name} (${department.division?.name || 'N/A'})`"
+                      :value="department.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </div>
+
               <!-- Article Info (for edit mode) -->
               <div v-if="isEdit && article.id" class="article-info">
                 <el-divider content-position="left">Article Information</el-divider>
@@ -339,13 +380,59 @@ const fetchArticleImages = async (articleId) => {
         fit="contain"
       />
     </el-dialog>
+
+    <!-- Table Insert Dialog -->
+    <el-dialog
+      v-model="tableDialogVisible"
+      title="Insert Table"
+      width="400px"
+      center
+    >
+      <el-form label-width="100px" label-position="left">
+        <el-form-item label="Rows">
+          <el-input-number
+            v-model="tableRows"
+            :min="1"
+            :max="20"
+            size="large"
+            style="width: 100%"
+          />
+        </el-form-item>
+        <el-form-item label="Columns">
+          <el-input-number
+            v-model="tableColumns"
+            :min="1"
+            :max="10"
+            size="large"
+            style="width: 100%"
+          />
+        </el-form-item>
+
+        <el-alert
+          title="Preview"
+          type="info"
+          :closable="false"
+          style="margin-top: 16px;"
+        >
+          Table will be created with {{ tableRows }} rows × {{ tableColumns }} columns
+        </el-alert>
+      </el-form>
+
+      <template #footer>
+        <el-button @click="tableDialogVisible = false">Cancel</el-button>
+        <el-button type="primary" @click="confirmInsertTable">
+          <el-icon><Check /></el-icon>
+          Insert Table
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, computed, onUnmounted } from 'vue'
+import { onMounted, reactive, ref, computed, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import {
   ArrowLeft,
   Document,
@@ -353,7 +440,12 @@ import {
   Upload,
   Picture,
   Plus,
-  InfoFilled
+  InfoFilled,
+  Delete,
+  Download,
+  UploadFilled,
+  UserFilled,
+  Lock
 } from '@element-plus/icons-vue'
 import {
   getAdminArticle,
@@ -363,13 +455,12 @@ import {
   deleteArticleImage,
   linkTemporaryImagesToArticle,
   cleanupTemporaryImages,
-  getTemporaryGallery,
   updateAdminArticleImage
 } from '@/api/article'
-import { getAdminCategories } from '@/api/category'
+import { getCategories } from '@/api/article'
+import { getAdminDivisions } from '@/api/division'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
-import Quill from 'quill'
 
 const route = useRoute()
 const router = useRouter()
@@ -380,43 +471,95 @@ const attachmentFile = ref(null)
 // State
 const formRef = ref()
 const uploadRef = ref()
+const quillEditorRef = ref()
 const formLoading = ref(false)
 const submitLoading = ref(false)
 const categories = ref([])
+const divisions = ref([])
+const departments = ref([])
 const fileList = ref([])
 const uploadedImages = ref([])
 const previewDialogVisible = ref(false)
 const previewImageUrl = ref('')
 
-// Upload configuration
-const uploadHeaders = ref({
-  'Authorization': `Bearer ${localStorage.getItem('token')}`,
-  'Accept': 'application/json'
-})
-const uploadData = computed(() => {
-  const data = {}
+// Table Dialog State
+const tableDialogVisible = ref(false)
+const tableRows = ref(3)
+const tableColumns = ref(3)
 
-  // Jika sedang edit artikel, kirim article_id
-  if (isEdit.value && article.id) {
-    data.article_id = article.id
-  }
-
-  return data
-})
-const convertDeltaToHtml = (delta) => {
-  if (typeof delta === 'string') {
-    return delta // Sudah HTML
-  }
-
-  if (delta && delta.ops) {
-    // Buat temporary Quill instance
-    const tempQuill = new Quill(document.createElement('div'))
-    tempQuill.setContents(delta)
-    return tempQuill.root.innerHTML
-  }
-
-  return ''
+// Function to insert table
+const insertTable = () => {
+  tableDialogVisible.value = true
 }
+
+const confirmInsertTable = () => {
+  const quill = quillEditorRef.value?.getQuill()
+  if (quill) {
+    const range = quill.getSelection(true)
+    if (range) {
+      // Generate table HTML
+      let tableHTML = '<table style="border-collapse: collapse; width: 100%; margin: 20px 0;">'
+
+      // Generate rows
+      for (let i = 0; i < tableRows.value; i++) {
+        tableHTML += '<tr>'
+        for (let j = 0; j < tableColumns.value; j++) {
+          const tag = i === 0 ? 'th' : 'td'
+          const style = 'border: 1px solid #dcdfe6; padding: 8px 12px;'
+          const headerStyle = i === 0 ? ' background-color: #f5f7fa; font-weight: 600;' : ''
+          tableHTML += `<${tag} style="${style}${headerStyle}">${tag === 'th' ? 'Header ' + (j + 1) : ''}</${tag}>`
+        }
+        tableHTML += '</tr>'
+      }
+      tableHTML += '</table><p><br></p>'
+
+      // Insert table
+      const delta = quill.clipboard.convert(tableHTML)
+      quill.updateContents(delta, 'user')
+      quill.setSelection(range.index + 1, 'user')
+
+      ElNotification({
+        title: 'Success',
+        message: 'Table inserted successfully',
+        type: 'success',
+        duration: 2000
+      })
+    }
+
+    tableDialogVisible.value = false
+  }
+}
+
+// Editor Options
+const editorOptions = ref({
+  theme: 'snow',
+  modules: {
+    toolbar: {
+      container: [
+        ['bold', 'italic', 'underline', 'strike'],
+        ['blockquote', 'code-block'],
+        [{ 'header': 1 }, { 'header': 2 }],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'script': 'sub'}, { 'script': 'super' }],
+        [{ 'indent': '-1'}, { 'indent': '+1' }],
+        [{ 'direction': 'rtl' }],
+        [{ 'size': ['small', false, 'large', 'huge'] }],
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        [{ 'color': [] }, { 'background': [] }],
+        [{ 'font': [] }],
+        [{ 'align': [] }],
+        ['clean'],
+        ['link', 'image', 'video'],
+        ['table'] // Table button
+      ],
+      handlers: {
+        table: insertTable
+      }
+    }
+  },
+  placeholder: 'Write your article content here...'
+})
+
 // Computed
 const isEdit = computed(() => !!route.params.id)
 const articleId = computed(() => route.params.id)
@@ -430,6 +573,9 @@ const article = reactive({
   type: '',
   category_id: null,
   status: 'draft',
+  visibility: 'public',
+  divisions: [],
+  departments: [],
   document_type: '',
   gallery_count: 0,
   created_at: null,
@@ -453,7 +599,48 @@ const rules = reactive({
   ],
   status: [
     { required: true, message: 'Status is required', trigger: 'change' }
+  ],
+  visibility: [
+    { required: true, message: 'Visibility is required', trigger: 'change' }
+  ],
+  divisions: [
+    {
+      type: 'array',
+      required: true,
+      message: 'At least one division is required for private articles',
+      trigger: 'change',
+      validator: (rule, value, callback) => {
+        if (article.visibility === 'private' && (!value || value.length === 0)) {
+          callback(new Error('At least one division is required'))
+        } else {
+          callback()
+        }
+      }
+    }
+  ],
+  departments: [
+    {
+      type: 'array',
+      required: true,
+      message: 'At least one department is required for private articles',
+      trigger: 'change',
+      validator: (rule, value, callback) => {
+        if (article.visibility === 'private' && (!value || value.length === 0)) {
+          callback(new Error('At least one department is required'))
+        } else {
+          callback()
+        }
+      }
+    }
   ]
+})
+
+// Watch visibility changes
+watch(() => article.visibility, (newValue) => {
+  if (newValue === 'public') {
+    article.divisions = []
+    article.departments = []
+  }
 })
 
 const beforeAttachmentUpload = (file) => {
@@ -478,15 +665,19 @@ const handleAttachmentUpload = async (options) => {
   try {
     attachmentFile.value = file
 
-    // Store file info for display before submit
     article.attachment = {
       name: file.name,
       size: file.size,
       formatted_size: formatFileSize(file.size),
-      file: file // Store the actual file
+      file: file
     }
 
-    ElMessage.success('PDF attached successfully! Remember to save the article.')
+    ElNotification({
+      title: 'Success',
+      message: 'PDF attached successfully! Remember to save the article.',
+      type: 'success',
+      duration: 3000
+    })
   } catch (error) {
     console.error('Attachment error:', error)
     ElMessage.error('Failed to attach PDF')
@@ -495,35 +686,16 @@ const handleAttachmentUpload = async (options) => {
 
 const removeAttachment = async () => {
   try {
-    await ElMessageBox.confirm(
-      'Are you sure you want to remove this attachment?',
-      'Confirm Remove',
-      {
-        confirmButtonText: 'Remove',
-        cancelButtonText: 'Cancel',
-        type: 'warning',
-      }
-    )
-
-    if (isEdit.value && article.id) {
-      // If editing, call API to remove from server
-      const response = await deleteAttachment(article.id)
-      if (response.success) {
-        article.attachment = null
-        attachmentFile.value = null
-        ElMessage.success('Attachment removed successfully!')
-      }
-    } else {
-      // If creating new, just remove from local state
-      article.attachment = null
-      attachmentFile.value = null
-      ElMessage.success('Attachment removed')
-    }
+    article.attachment = null
+    attachmentFile.value = null
+    ElNotification({
+      title: 'Success',
+      message: 'Attachment removed',
+      type: 'success'
+    })
   } catch (error) {
-    if (error !== 'cancel') {
-      console.error('Remove attachment error:', error)
-      ElMessage.error('Failed to remove attachment')
-    }
+    console.error('Remove attachment error:', error)
+    ElMessage.error('Failed to remove attachment')
   }
 }
 
@@ -534,18 +706,22 @@ const downloadAttachment = async () => {
   }
 
   try {
-    const response = await downloadAttachment(article.id)
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const url = `${baseUrl}/storage/${article.attachment_path}`
 
-    // Create blob link to download
-    const url = window.URL.createObjectURL(new Blob([response]))
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', article.attachment.name)
+    link.download = article.attachment.name
+    link.target = '_blank'
     document.body.appendChild(link)
     link.click()
-    link.remove()
+    document.body.removeChild(link)
 
-    ElMessage.success('Download started')
+    ElNotification({
+      title: 'Success',
+      message: 'Download started',
+      type: 'success'
+    })
   } catch (error) {
     console.error('Download error:', error)
     ElMessage.error('Failed to download attachment')
@@ -603,21 +779,15 @@ const beforeUpload = (file) => {
     return false
   }
 
-  // Add article_id to upload data if editing
-  if (isEdit.value && article.id) {
-    uploadData.value.article_id = article.id
-  }
-
   return true
 }
+
 const generateSessionKey = () => {
   return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
 }
 
-// State tambahan
 const sessionKey = ref(generateSessionKey())
 
-// Fixed handleUploadRequest function
 const handleUploadRequest = async (options) => {
   const { file, onProgress, onSuccess, onError } = options
 
@@ -625,11 +795,9 @@ const handleUploadRequest = async (options) => {
     const formData = new FormData()
     formData.append('file', file)
 
-    // Jika sedang edit artikel, kirim article_id
     if (isEdit.value && article.id) {
       formData.append('article_id', article.id)
     } else {
-      // Jika create mode, kirim session_key
       formData.append('session_key', sessionKey.value)
     }
 
@@ -655,6 +823,7 @@ const handleUploadRequest = async (options) => {
     }
   }
 }
+
 const updateImageCaption = async (image) => {
   if (!image.id) return
 
@@ -664,10 +833,15 @@ const updateImageCaption = async (image) => {
       alt_text: image.alt_text || ''
     }
 
-    const response = await updateAdminArticleImage(image.id, payload) // pastikan API-nya ada
+    const response = await updateAdminArticleImage(image.id, payload)
 
     if (response.success !== false) {
-      ElMessage.success('Image caption updated successfully')
+      ElNotification({
+        title: 'Success',
+        message: 'Image caption updated successfully',
+        type: 'success',
+        duration: 2000
+      })
     } else {
       ElMessage.error(response.message || 'Failed to update caption')
     }
@@ -677,30 +851,16 @@ const updateImageCaption = async (image) => {
   }
 }
 
-// 🗑️ Hapus gambar dari gallery dan upload preview
 const removeUploadedImage = async (index) => {
   try {
-    await ElMessageBox.confirm(
-      'Are you sure you want to delete this image?',
-      'Confirm Delete',
-      {
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-        type: 'warning',
-      }
-    )
-
     const image = uploadedImages.value[index]
 
-    // Panggil API delete
     const response = await deleteArticleImage(image.id)
 
     if (response.success) {
-      // Hapus dari daftar gallery
       uploadedImages.value.splice(index, 1)
       article.images = [...uploadedImages.value]
 
-      // Sinkronkan juga ke fileList upload (hapus preview)
       const uploadIndex = fileList.value.findIndex(f => {
         const uploadedId = f.response?.data?.id || f.id
         return uploadedId === image.id
@@ -709,7 +869,6 @@ const removeUploadedImage = async (index) => {
         fileList.value.splice(uploadIndex, 1)
       }
 
-      // Jika preview sedang menampilkan gambar ini, tutup dialog
       if (previewDialogVisible.value && previewImageUrl.value === image.url) {
         previewDialogVisible.value = false
         previewImageUrl.value = ''
@@ -719,7 +878,11 @@ const removeUploadedImage = async (index) => {
         article.gallery_count = uploadedImages.value.length
       }
 
-      ElMessage.success('Image deleted successfully!')
+      ElNotification({
+        title: 'Success',
+        message: 'Image deleted successfully!',
+        type: 'success'
+      })
     } else {
       ElMessage.error(response.message || 'Failed to delete image')
     }
@@ -731,12 +894,10 @@ const removeUploadedImage = async (index) => {
   }
 }
 
-
 const handleUploadError = (error, file, fileList) => {
   console.error('Upload error:', error)
   ElMessage.error('Upload failed!')
 
-  // Remove failed file from list
   const index = fileList.findIndex(item => item.uid === file.uid)
   if (index > -1) {
     fileList.splice(index, 1)
@@ -744,9 +905,7 @@ const handleUploadError = (error, file, fileList) => {
 }
 
 const handleRemove = (file, fileList) => {
-  // If file has response (successfully uploaded), we might want to delete from server
   if (file.response && file.response.success) {
-    // You can add API call here to delete from server if needed
     const imageIndex = uploadedImages.value.findIndex(img => img.id === file.response.data.id)
     if (imageIndex > -1) {
       uploadedImages.value.splice(imageIndex, 1)
@@ -765,7 +924,6 @@ const handlePreview = (file) => {
   } else if (file.response && file.response.data.url) {
     previewImageUrl.value = file.response.data.url
   } else {
-    // For local preview before upload
     const reader = new FileReader()
     reader.onload = (e) => {
       previewImageUrl.value = e.target.result
@@ -776,19 +934,36 @@ const handlePreview = (file) => {
 }
 
 const handleExceed = (files, fileList) => {
-  ElMessage.warning(`Maximum 10 images allowed. You selected ${files.length} files, current total: ${fileList.length}`)
+  ElMessage.warning(`Maximum 20 images allowed. You selected ${files.length} files, current total: ${fileList.length}`)
 }
+
 const temporaryImages = ref([])
 
 const fetchCategories = async () => {
   try {
-    const response = await getAdminCategories()
+    const response = await getCategories()
     if (response.success !== false) {
       categories.value = response.data || response || []
     }
   } catch (error) {
     console.error('Fetch categories error:', error)
     ElMessage.error('Failed to load categories')
+  }
+}
+
+const fetchDivisionsAndDepartments = async () => {
+  try {
+    const response = await getAdminDivisions()
+    if (response.success !== false) {
+      const allData = response.data || response || []
+
+      // Pisahkan berdasarkan type
+      divisions.value = allData.filter(item => item.type === 'division')
+      departments.value = allData.filter(item => item.type === 'department')
+    }
+  } catch (error) {
+    console.error('Fetch divisions/departments error:', error)
+    ElMessage.error('Failed to load divisions and departments')
   }
 }
 
@@ -802,20 +977,17 @@ const fetchArticle = async () => {
     if (response.success !== false) {
       const data = response.article || response
 
-      // Convert HTML content to Quill Delta format
-      let contentForEditor = data.content || ''
-      if (typeof contentForEditor === 'string' && contentForEditor.trim()) {
-        contentForEditor = convertHtmlToDelta(contentForEditor)
-      }
-
       Object.assign(article, {
         id: data.id,
         title: data.title || '',
         description: data.description || '',
-        content: contentForEditor, // Use converted content
+        content: data.content || '',
         type: data.type || '',
         category_id: data.category_id,
         status: data.status || 'draft',
+        visibility: data.visibility || 'public', // NEW
+        divisions: data.divisions?.map(d => d.id) || [], // NEW
+        departments: data.departments?.map(d => d.id) || [], // NEW
         document_type: data.document_type || '',
         gallery_count: data.gallery_count || 0,
         created_at: data.created_at,
@@ -825,13 +997,14 @@ const fetchArticle = async () => {
         attachment: data.attachment || null
       })
 
-      // Populate uploaded images if they exist
       if (data.images && data.images.length > 0) {
         uploadedImages.value = data.images.map(img => ({
           id: img.id,
           url: img.url,
           name: img.name,
-          size: img.size
+          size: img.size,
+          caption: img.caption || '',
+          alt_text: img.alt_text || ''
         }))
       }
     } else {
@@ -847,25 +1020,6 @@ const fetchArticle = async () => {
   }
 }
 
-const convertHtmlToDelta = (html) => {
-  if (!html) return ''
-
-  // Jika sudah dalam format Delta
-  if (typeof html === 'object' && html.ops) {
-    return html
-  }
-
-  try {
-    const tempContainer = document.createElement('div')
-    const tempQuill = new Quill(tempContainer)
-    tempQuill.clipboard.dangerouslyPasteHTML(html)
-    return tempQuill.getContents()
-  } catch (error) {
-    console.error('Error converting HTML to Delta:', error)
-    return '' // Return empty string jika gagal
-  }
-}
-
 const handleSubmit = async (publishAfterSave = false) => {
   if (!formRef.value) return
 
@@ -874,59 +1028,64 @@ const handleSubmit = async (publishAfterSave = false) => {
 
   submitLoading.value = true
 
-  // Convert content to HTML
-  let contentHtml = article.content
-  if (typeof article.content === 'object' && article.content.ops) {
-    contentHtml = convertDeltaToHtml(article.content)
-  }
-
   try {
     let response
 
     if (isEdit.value) {
-      // Untuk UPDATE: Gunakan FormData dengan proper handling
       const formData = new FormData()
       formData.append('title', article.title)
       formData.append('description', article.description)
-      formData.append('content', contentHtml)
+      formData.append('content', article.content)
       formData.append('type', article.type)
       formData.append('category_id', article.category_id)
       formData.append('status', publishAfterSave ? 'published' : article.status)
+      formData.append('visibility', article.visibility)
+
+      // Add divisions and departments for private articles
+      if (article.visibility === 'private') {
+        article.divisions.forEach(divisionId => {
+          formData.append('divisions[]', divisionId)
+        })
+        article.departments.forEach(departmentId => {
+          formData.append('departments[]', departmentId)
+        })
+      }
 
       if (article.document_type) {
         formData.append('document_type', article.document_type)
       }
 
-      // Add attachment if exists
       if (attachmentFile.value) {
         formData.append('attachment', attachmentFile.value)
       }
 
-      // Add flag to remove attachment if needed
       if (!article.attachment && !attachmentFile.value) {
         formData.append('remove_attachment', '1')
       }
 
-      // PENTING: Tambahkan _method untuk Laravel
       formData.append('_method', 'PUT')
-
-      // Debug: Log formData contents
-      console.log('FormData contents:')
-      for (let pair of formData.entries()) {
-        console.log(pair[0], pair[1])
-      }
 
       response = await updateAdminArticle(article.id, formData)
 
     } else {
-      // Untuk CREATE
       const formData = new FormData()
       formData.append('title', article.title)
       formData.append('description', article.description)
-      formData.append('content', contentHtml)
+      formData.append('content', article.content)
       formData.append('type', article.type)
       formData.append('category_id', article.category_id)
       formData.append('status', publishAfterSave ? 'published' : article.status)
+      formData.append('visibility', article.visibility)
+
+      // Add divisions and departments for private articles
+      if (article.visibility === 'private') {
+        article.divisions.forEach(divisionId => {
+          formData.append('divisions[]', divisionId)
+        })
+        article.departments.forEach(departmentId => {
+          formData.append('departments[]', departmentId)
+        })
+      }
 
       if (article.document_type) {
         formData.append('document_type', article.document_type)
@@ -938,17 +1097,23 @@ const handleSubmit = async (publishAfterSave = false) => {
 
       response = await createAdminArticle(formData)
 
-      // Link temporary images if any
       if (response.success !== false && uploadedImages.value.length > 0) {
         const newArticleId = response.id || response.data.id
         await linkTemporaryImagesToArticleFixed(newArticleId)
       }
+      console.info(response)
     }
 
     if (response.success !== false) {
       const action = isEdit.value ? 'updated' : 'created'
       const publishText = publishAfterSave ? ' and published' : ''
-      ElMessage.success(`Article ${action}${publishText} successfully`)
+
+      ElNotification({
+        title: 'Success',
+        message: `Article ${action}${publishText} successfully`,
+        type: 'success',
+        duration: 3000
+      })
 
       if (!isEdit.value && (response.id || response.data?.id)) {
         const newId = response.id || response.data.id
@@ -962,7 +1127,6 @@ const handleSubmit = async (publishAfterSave = false) => {
   } catch (error) {
     console.error('Submit error:', error)
 
-    // Better error handling
     if (error.response?.data?.errors) {
       const errors = error.response.data.errors
       const errorMessages = Object.values(errors).flat().join(', ')
@@ -1004,38 +1168,27 @@ const cleanupTemporaryImagesFixed = async () => {
   }
 }
 
-// Add cleanup on component unmount
 onUnmounted(() => {
   cleanupTemporaryImagesFixed()
 })
 
 onBeforeRouteLeave((to, from, next) => {
   if (!isEdit.value && uploadedImages.value.length > 0) {
-    ElMessageBox.confirm(
-      'You have uploaded images that are not saved. Are you sure you want to leave?',
-      'Unsaved Changes',
-      {
-        confirmButtonText: 'Leave',
-        cancelButtonText: 'Stay',
-        type: 'warning',
-      }
-    )
-    .then(() => {
-      cleanupTemporaryImagesFixed() // Gunakan method yang sudah diperbaiki
-      next()
-    })
-    .catch(() => {
-      next(false)
-    })
+    cleanupTemporaryImagesFixed()
+    next()
   } else {
     next()
   }
 })
 
-// Update handleUploadSuccess untuk handle temporary images
 const handleUploadSuccess = (response, file, fileList) => {
   if (response.success) {
-    ElMessage.success('Image uploaded successfully!')
+    ElNotification({
+      title: 'Success',
+      message: 'Image uploaded successfully!',
+      type: 'success',
+      duration: 2000
+    })
 
     const imageData = {
       id: response.data.id,
@@ -1044,24 +1197,21 @@ const handleUploadSuccess = (response, file, fileList) => {
       size: response.data.size,
       formatted_size: response.data.formatted_size,
       dimensions: response.data.dimensions,
-      alt_text: response.data.alt_text,
-      caption: response.data.caption,
+      alt_text: response.data.alt_text || '',
+      caption: response.data.caption || '',
       is_primary: response.data.is_primary
     }
 
     if (isEdit.value) {
-      // Untuk edit mode, langsung tambahkan ke uploadedImages
       uploadedImages.value.push(imageData)
       article.images = [...uploadedImages.value]
       article.gallery_count = uploadedImages.value.length
     } else {
-      // Untuk create mode, simpan di temporaryImages
       temporaryImages.value.push(response.data.id)
       uploadedImages.value.push(imageData)
     }
   } else {
     ElMessage.error(response.message || 'Upload failed!')
-    // Remove failed file from list
     const index = fileList.findIndex(item => item.uid === file.uid)
     if (index > -1) {
       fileList.splice(index, 1)
@@ -1069,7 +1219,6 @@ const handleUploadSuccess = (response, file, fileList) => {
   }
 }
 
-// Reset form method update
 const resetForm = () => {
   Object.assign(article, {
     id: null,
@@ -1079,6 +1228,9 @@ const resetForm = () => {
     type: '',
     category_id: null,
     status: 'draft',
+    visibility: 'public',
+    divisions: [],
+    departments: [],
     document_type: '',
     gallery_count: 0,
     created_at: null,
@@ -1089,7 +1241,7 @@ const resetForm = () => {
 
   fileList.value = []
   uploadedImages.value = []
-  temporaryImages.value = [] // Reset temporary images
+  temporaryImages.value = []
 }
 
 const handleSubmitAndPublish = async () => {
@@ -1098,6 +1250,7 @@ const handleSubmitAndPublish = async () => {
 
 onMounted(async () => {
   await fetchCategories()
+  await fetchDivisionsAndDepartments ()
   if (isEdit.value) {
     await fetchArticle()
   }
@@ -1143,22 +1296,19 @@ onMounted(async () => {
   border: 1px solid #e4e7ed;
 }
 
+.access-control {
+  background: #fef9e7;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
 .editor-container {
   position: relative;
+  width: 100%;
+  margin-bottom: 50px;
 }
 
-.content-editor {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.editor-help {
-  margin-top: 8px;
-  text-align: center;
-}
-
-/* Upload Section Styles */
 .upload-section {
   width: 100%;
 }
@@ -1182,40 +1332,84 @@ onMounted(async () => {
   font-size: 12px;
 }
 
-/* Uploaded Images Preview */
-.uploaded-images-preview {
+.uploaded-gallery-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
   margin-top: 20px;
 }
 
-.image-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px;
-}
-
-.image-item {
-  position: relative;
-  border-radius: 6px;
-  overflow: hidden;
+.gallery-card {
   border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
 }
 
-.preview-image {
-  width: 80px;
-  height: 80px;
-  display: block;
+.gallery-card-image {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  background: #f5f7fa;
 }
 
-.image-actions {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  opacity: 0;
-  transition: opacity 0.3s;
+.gallery-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.image-item:hover .image-actions {
-  opacity: 1;
+.gallery-card-content {
+  padding: 12px;
+}
+
+.gallery-card-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.attachment-section {
+  width: 100%;
+}
+
+.attachment-preview {
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 16px;
+  background: #f8f9fa;
+}
+
+.attachment-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pdf-icon {
+  color: #f56c6c;
+}
+
+.attachment-details {
+  flex: 1;
+}
+
+.attachment-name {
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 4px;
+}
+
+.attachment-size {
+  font-size: 12px;
+  color: #909399;
+}
+
+.attachment-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
 .article-info {
@@ -1253,7 +1447,6 @@ onMounted(async () => {
   margin: 0 8px;
 }
 
-/* Element Plus customizations */
 :deep(.el-form-item__label) {
   font-weight: 500;
   color: #606266;
@@ -1272,10 +1465,6 @@ onMounted(async () => {
   font-family: inherit;
 }
 
-:deep(.content-editor .el-textarea__inner) {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-}
-
 :deep(.el-radio-button__inner) {
   border-radius: 4px !important;
 }
@@ -1292,7 +1481,6 @@ onMounted(async () => {
   padding: 30px;
 }
 
-/* Upload component customization */
 :deep(.el-upload--picture-card) {
   width: 148px;
   height: 148px;
@@ -1305,7 +1493,26 @@ onMounted(async () => {
   border-radius: 6px;
 }
 
-/* Responsive design */
+:deep(.ql-container) {
+  font-size: 15px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+:deep(.ql-editor) {
+  min-height: 350px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+:deep(.ql-toolbar) {
+  border-radius: 6px 6px 0 0;
+  background: #fafafa;
+}
+
+:deep(.ql-container) {
+  border-radius: 0 0 6px 6px;
+}
+
 @media (max-width: 1200px) {
   .app-container {
     padding: 16px;
@@ -1326,21 +1533,78 @@ onMounted(async () => {
     width: calc(50% - 8px);
   }
 
-  .image-list {
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  }
-
-  .preview-image {
-    width: 60px;
-    height: 60px;
+  .uploaded-gallery-list {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
-
-.quill-full {
+:deep(.ql-snow .ql-editor table) {
+  border-collapse: collapse;
   width: 100%;
+  margin: 20px 0;
 }
 
-.editor-container {
-  width: 100%;
+:deep(.ql-snow .ql-editor table td),
+:deep(.ql-snow .ql-editor table th) {
+  border: 1px solid #dcdfe6;
+  padding: 8px 12px;
+  vertical-align: top;
+}
+
+:deep(.ql-snow .ql-editor table th) {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  text-align: left;
+}
+
+:deep(.ql-snow .ql-editor table tr:hover) {
+  background-color: #fafafa;
+}
+
+/* Table Operation Menu Styling */
+:deep(.qlbt-operation-menu) {
+  background: white;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  z-index: 1000;
+}
+
+:deep(.qlbt-operation-menu-item) {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+:deep(.qlbt-operation-menu-item:hover) {
+  background-color: #f5f7fa;
+  color: #409eff;
+}
+
+/* Custom Insert Table Button */
+:deep(.ql-snow .ql-toolbar button.ql-insertTable) {
+  width: auto !important;
+}
+
+:deep(.ql-snow .ql-toolbar button.ql-insertTable::before) {
+  content: "📊";
+  font-size: 16px;
+}
+
+/* Selected cell highlight */
+:deep(.ql-snow .ql-editor .qlbt-col-tool),
+:deep(.ql-snow .ql-editor .qlbt-selection-line) {
+  background-color: #409eff !important;
+}
+
+/* Table resize handles */
+:deep(.qlbt-col-tool-cell-holder) {
+  cursor: col-resize;
+}
+
+:deep(.qlbt-col-tool-cell-holder:hover) {
+  background-color: #409eff;
 }
 </style>

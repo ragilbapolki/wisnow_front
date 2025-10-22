@@ -1,4 +1,4 @@
-<!-- ArticleList.vue -->
+ q<!-- ArticleList.vue -->
 <template>
   <div class="article-list-page">
     <!-- Header Section -->
@@ -6,10 +6,14 @@
       <div class="header-container">
         <div class="header-logo">
           <router-link to="/" class="logo-link">
-            <span class="company-name-header">WISMILAK</span>
-            <span class="company-subtitle">Knowledge Base</span>
+            <img src="@/assets/images/logo_kb_no_text.png" alt="Wismilak Logo" class="company-logo" />
+            <div class="company-text">
+              <span class="company-name-header">WISMILAK</span>
+              <span class="company-subtitle">Knowledge Base</span>
+            </div>
           </router-link>
         </div>
+
 
         <nav class="header-nav">
           <router-link to="/" class="nav-link">Home</router-link>
@@ -18,7 +22,7 @@
         <div class="header-actions">
           <div v-if="isAuthenticated" class="user-menu">
             <div class="user-info">
-              <img :src="user.avatar || '/default-avatar.png'" :alt="user.name" class="user-avatar" />
+              <img :src="user.avatar_url || '/default-avatar.png'" :alt="user.name" class="user-avatar" />
               <span class="user-name">{{ user.name }}</span>
             </div>
           </div>
@@ -61,7 +65,6 @@
           </div>
 
           <div class="filter-controls">
-            <!-- Category Filter -->
             <div class="filter-group">
               <label class="filter-label">Kategori</label>
               <el-select v-model="filters.category" @change="applyFilters">
@@ -93,6 +96,16 @@
                 <el-option value="popular">🔥 Terpopuler</el-option>
                 <el-option value="rating">⭐ Rating Tertinggi</el-option>
                 <el-option value="title">🔤 Judul (A-Z)</el-option>
+              </el-select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-label">Penulis</label>
+              <el-select v-model="filters.penulis" @change="applyFilters">
+                <el-option value="">Semua Penulis</el-option>
+                <el-option v-for="pen in penulis" :key="pen.id" :value="pen.id" :label="pen.name" >
+                  {{ pen.name }} ({{ pen.articles_count }})
+                </el-option>
               </el-select>
             </div>
 
@@ -185,7 +198,7 @@
             <div class="article-footer">
               <div class="article-author">
                 <img
-                  :src="article.user?.avatar || '/default-avatar.png'"
+                  :src="article.user?.avatar_url || '/default-avatar.png'"
                   :alt="article.user?.name || 'Unknown'"
                   class="author-avatar"
                 />
@@ -262,6 +275,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getArticles, getCategories } from '@/api/article'
+import { getPenulis } from '@/api/user'
 import { dispatch, ctx } from '@/store'
 import { ElMessage } from 'element-plus'
 
@@ -282,13 +296,16 @@ const perPage = ref(12)
 
 // Categories State
 const categories = ref([])
+// Categories penulis
+const penulis = ref([])
 
 // Filters State
 const filters = reactive({
   search: route.query.search || '',
   category: route.query.category || '',
   type: route.query.type || '',
-  sort: route.query.sort || 'latest'
+  sort: route.query.sort || 'latest',
+  penulis: route.query.penulis || ''
 })
 
 // Debounce timer
@@ -330,34 +347,25 @@ const loadArticles = async () => {
     if (filters.search) params.search = filters.search
     if (filters.category) params.category = filters.category
     if (filters.type) params.type = filters.type
+    if (filters.penulis) params.penulis = filters.penulis // ✅ tambahkan ini
 
     const response = await getArticles(params)
 
-    console.log('API Response:', response)
-
-    // ✅ Handle response format {data: [...]}
     if (response && response.data) {
       articles.value = Array.isArray(response.data) ? response.data : []
 
-      // Cek apakah ada metadata pagination
       if (response.total !== undefined) {
-        // Format lengkap dengan pagination
         totalArticles.value = response.total
         totalPages.value = response.last_page || 1
         currentPage.value = response.current_page || currentPage.value
       } else {
-        // ✅ Format sederhana - hitung manual
         const articlesCount = articles.value.length
-
         if (articlesCount < perPage.value) {
-          // Ini halaman terakhir
           totalPages.value = currentPage.value
           totalArticles.value = ((currentPage.value - 1) * perPage.value) + articlesCount
         } else {
-          // Masih ada halaman berikutnya
-          // Kita perlu fetch sekali lagi untuk tahu total
           totalPages.value = currentPage.value + 1
-          totalArticles.value = currentPage.value * perPage.value + 1 // estimasi minimal
+          totalArticles.value = currentPage.value * perPage.value + 1
         }
       }
     } else {
@@ -366,14 +374,6 @@ const loadArticles = async () => {
       totalPages.value = 1
     }
 
-    console.log('Parsed:', {
-      articlesCount: articles.value.length,
-      totalArticles: totalArticles.value,
-      totalPages: totalPages.value,
-      currentPage: currentPage.value
-    })
-
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' })
   } catch (error) {
     console.error('Error loading articles:', error)
@@ -392,6 +392,16 @@ const loadCategories = async () => {
     console.error('Error loading categories:', error)
   }
 }
+
+const loadPenulis = async () => {
+  try {
+    const response = await getPenulis()
+    penulis.value = response || []
+  } catch (error) {
+    console.error('Error loading penulis:', error)
+  }
+}
+
 
 const applyFilters = () => {
   currentPage.value = 1
@@ -416,6 +426,7 @@ const resetFilters = () => {
   filters.category = ''
   filters.type = ''
   filters.sort = 'latest'
+  filters.penulis = ''
   currentPage.value = 1
   updateURL()
   loadArticles()
@@ -436,6 +447,7 @@ const updateURL = () => {
   if (filters.type) query.type = filters.type
   if (filters.sort !== 'latest') query.sort = filters.sort
   if (currentPage.value > 1) query.page = currentPage.value
+  if (filters.penulis) query.penulis = filters.penulis
 
   router.push({ query })
 }
@@ -491,12 +503,10 @@ const getArticleTypeClass = (type) => {
 // Lifecycle
 onMounted(() => {
   loadCategories()
-
-  // Load from URL query
+  loadPenulis()
   if (route.query.page) {
     currentPage.value = parseInt(route.query.page)
   }
-
   loadArticles()
 })
 
@@ -535,11 +545,6 @@ watch(() => route.query, (newQuery) => {
   justify-content: space-between;
 }
 
-.header-logo .logo-link {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-}
 
 .company-name-header {
   font-size: 1.25rem;
@@ -1131,4 +1136,35 @@ watch(() => route.query, (newQuery) => {
     display: none;
   }
 }
+.header-logo .logo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem; /* jarak antara logo dan teks */
+  text-decoration: none;
+}
+
+.company-logo {
+  width: 45px;
+  height: 45px;
+  object-fit: contain;
+}
+
+.company-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.company-name-header {
+  font-weight: 700;
+  color: #008000; /* hijau khas Wismilak */
+  font-size: 1.1rem;
+}
+
+.company-subtitle {
+  font-size: 0.8rem;
+  color: #555;
+}
+
 </style>
