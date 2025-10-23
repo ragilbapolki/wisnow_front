@@ -12,16 +12,16 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="header-nav">
+        <!-- <nav class="header-nav">
           <div class="nav-links">
             <router-link to="/" class="nav-link">Home</router-link>
             <router-link to="/articlesList" class="nav-link">Artikel</router-link>
             <a href="#categories" class="nav-link" @click.prevent="scrollToCategories">Kategori</a>
           </div>
-        </nav>
+        </nav> -->
 
         <!-- Search Bar -->
-        <div class="header-search">
+        <!-- <div class="header-search">
           <div class="search-input-container">
             <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
@@ -39,7 +39,7 @@
               @keyup.enter="handleSearch"
             />
           </div>
-        </div>
+        </div> -->
 
         <!-- Login/User Section -->
         <div class="header-actions">
@@ -175,7 +175,7 @@
       </div>
     </div>
 
-    <!-- Hero Section -->
+    <!-- Hero Section - UPDATED -->
     <section class="hero-section">
       <div class="hero-overlay"></div>
       <div class="hero-content">
@@ -188,25 +188,52 @@
           </div>
         </div>
 
-        <!-- Feature Cards -->
-        <div class="feature-cards">
-          <div class="feature-card">
-            <div class="feature-icon">📚</div>
-            <h3 class="feature-title">1000+ Artikel</h3>
-            <p class="feature-desc">Pengetahuan lengkap</p>
+        <!-- ✅ GANTI 3 CARDS DENGAN HERO SEARCH BAR -->
+        <div class="hero-search-container">
+          <div class="hero-search-wrapper">
+            <svg class="hero-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              ></path>
+            </svg>
+            <input
+              type="text"
+              placeholder="Cari artikel, SOP, panduan, atau kebijakan..."
+              class="hero-search-input"
+              v-model="searchQuery"
+              @keyup.enter="handleSearch"
+            />
+            <button @click="handleSearch" class="hero-search-button">
+              <svg class="search-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                ></path>
+              </svg>
+            </button>
           </div>
+          <p class="hero-search-hint">💡 Coba cari: "SOP Keuangan" atau "Panduan SAP"</p>
+        </div>
 
-          <div class="feature-card">
-            <div class="feature-icon">📈</div>
-            <h3 class="feature-title">Update Rutin</h3>
-            <p class="feature-desc">Informasi terkini</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">✅</div>
-            <h3 class="feature-title">Terverifikasi</h3>
-            <p class="feature-desc">Konten berkualitas</p>
-          </div>
+        <!-- Quick Access Buttons -->
+        <div class="quick-access">
+          <router-link to="/articlesList" class="quick-btn">
+            <span class="quick-btn-icon">📖</span>
+            Semua Artikel
+          </router-link>
+          <a href="#categories" @click.prevent="scrollToCategories" class="quick-btn">
+            <span class="quick-btn-icon">📁</span>
+            Kategori
+          </a>
+          <router-link to="/articlesList?sort=popular" class="quick-btn">
+            <span class="quick-btn-icon">🔥</span>
+            Populer
+          </router-link>
         </div>
       </div>
     </section>
@@ -542,7 +569,6 @@ const scrollToCategories = () => {
   }
 }
 
-// ✅ Fixed: Redirect ke ArticleList dengan search query
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
     router.push({
@@ -557,9 +583,8 @@ const scrollCategories = (direction) => {
   const slider = categoriesSlider.value
   if (!slider) return
 
-  // Lebar satu card + gap
-  const cardWidth = 220 // 200px width + 20px gap (dari min-width category-card)
-  const scrollAmount = cardWidth * 3 // Scroll 3 cards at a time
+  const cardWidth = 220
+  const scrollAmount = cardWidth * 3
 
   const newScrollLeft = direction === 'left'
     ? slider.scrollLeft - scrollAmount
@@ -579,7 +604,7 @@ const updateSliderButtons = () => {
   const slider = categoriesSlider.value
   if (!slider) return
 
-  isAtStart.value = slider.scrollLeft <= 10 // Toleransi 10px
+  isAtStart.value = slider.scrollLeft <= 10
   isAtEnd.value = slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10
 }
 
@@ -651,7 +676,6 @@ const loadCategories = async () => {
     categories.value = response.data || response || []
     categoriesLoading.value = false
 
-    // Update slider buttons after categories loaded
     nextTick(() => {
       updateSliderButtons()
     })
@@ -707,7 +731,7 @@ const getCategoryIcon = (name) => {
     'HR': '👥',
     'IT Development': '💻',
     'SDM & Kepegawaian': '👥',
-    'Keuangan': '💰',
+    'Keuangan & Akuntansi': '💰',
     'Marketing': '📢',
     'Operasional': '🏭',
     'Produksi': '🏭',
@@ -725,7 +749,6 @@ onMounted(() => {
   loadPopularArticles()
   loadCategories()
 
-  // Add scroll listener for slider
   const slider = categoriesSlider.value
   if (slider) {
     slider.addEventListener('scroll', updateSliderButtons)
@@ -1212,13 +1235,13 @@ $light_gray: #eee;
   text-decoration: underline;
 }
 
-/* Hero Section */
+/* ✅ Hero Section - UPDATED */
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%);
   color: white;
-  padding: 4rem 1rem 4rem;
-  min-height: 60vh;
+  padding: 3rem 1rem 3rem;
+  min-height: 45vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1238,7 +1261,8 @@ $light_gray: #eee;
 
 .hero-content {
   text-align: center;
-  max-width: 800px;
+  max-width: 900px;
+  width: 100%;
   z-index: 1;
   position: relative;
 }
@@ -1250,7 +1274,7 @@ $light_gray: #eee;
   border-radius: 2rem;
   font-size: 0.875rem;
   font-weight: 500;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -1260,97 +1284,127 @@ $light_gray: #eee;
 }
 
 .tree-illustration {
-  margin-bottom: 1.5rem;
-}
-
-.tree-svg {
-  width: 120px;
-  height: 90px;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-}
-
-.company-name {
-  font-size: 4rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  margin: 0;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.welcome-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
-}
-
-.highlight {
-  color: #86efac;
-}
-
-.feature-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.feature-card {
-  background: rgba(22, 163, 74, 0.3);
-  border-radius: 1rem;
-  padding: 2rem 1.5rem;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  background: rgba(22, 163, 74, 0.4);
-}
-
-.feature-icon {
-  font-size: 2.5rem;
   margin-bottom: 1rem;
 }
 
-.feature-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
+.logo-img {
+  max-width: 300px;
+  height: auto;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
-.feature-desc {
-  color: #d1fae5;
-  font-size: 0.95rem;
+/* ✅ NEW: Hero Search Bar Styles */
+.hero-search-container {
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  padding: 0 1rem;
 }
 
-.cta-button {
-  display: inline-flex;
+.hero-search-wrapper {
+  position: relative;
+  display: flex;
   align-items: center;
-  padding: 1rem 2rem;
   background: white;
-  color: #15803d;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  text-decoration: none;
+  border-radius: 9999px;
+  padding: 0.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.cta-button:hover {
-  background: #f0fdf4;
+.hero-search-wrapper:focus-within {
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.cta-arrow {
+.hero-search-icon {
+  position: absolute;
+  left: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.hero-search-input {
+  flex: 1;
+  padding: 1rem 1rem 1rem 3.5rem;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  background: transparent;
+  color: #1f2937;
+}
+
+.hero-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.hero-search-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 60px;
+}
+
+.hero-search-button:hover {
+  background: #15803d;
+  transform: scale(1.05);
+}
+
+.search-btn-icon {
   width: 1.25rem;
   height: 1.25rem;
-  margin-left: 0.5rem;
+}
+
+.hero-search-hint {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* ✅ NEW: Quick Access Buttons */
+.quick-access {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  text-decoration: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.quick-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.quick-btn-icon {
+  font-size: 1.125rem;
 }
 
 /* Articles Section */
@@ -1751,18 +1805,6 @@ $light_gray: #eee;
     order: 1;
   }
 
-  .company-name {
-    font-size: 3rem;
-  }
-
-  .welcome-title {
-    font-size: 2rem;
-  }
-
-  .feature-cards {
-    grid-template-columns: 1fr;
-  }
-
   .section-header {
     flex-direction: column;
     align-items: stretch;
@@ -1777,7 +1819,34 @@ $light_gray: #eee;
   }
 
   .hero-section {
-    padding: 6rem 1rem 4rem;
+    padding: 5rem 1rem 3rem;
+    min-height: 50vh;
+  }
+
+  .logo-img {
+    max-width: 250px;
+  }
+
+  .hero-search-container {
+    padding: 0 0.5rem;
+  }
+
+  .hero-search-input {
+    font-size: 0.875rem;
+    padding: 0.875rem 0.875rem 0.875rem 3rem;
+  }
+
+  .hero-search-button {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .quick-access {
+    gap: 0.75rem;
+  }
+
+  .quick-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.8125rem;
   }
 
   .categories-slider-wrapper {
@@ -1802,15 +1871,65 @@ $light_gray: #eee;
 
 @media (max-width: 480px) {
   .hero-section {
-    padding: 5rem 1rem 3rem;
+    padding: 4rem 0.5rem 2.5rem;
+    min-height: 45vh;
   }
 
-  .company-name {
-    font-size: 2.5rem;
+  .logo-img {
+    max-width: 200px;
   }
 
-  .welcome-title {
-    font-size: 1.75rem;
+  .portal-badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.875rem;
+  }
+
+  .hero-search-container {
+    padding: 0;
+  }
+
+  .hero-search-wrapper {
+    padding: 0.375rem;
+  }
+
+  .hero-search-icon {
+    left: 1rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .hero-search-input {
+    font-size: 0.8125rem;
+    padding: 0.75rem 0.75rem 0.75rem 2.75rem;
+  }
+
+  .hero-search-button {
+    padding: 0.75rem 1rem;
+    min-width: 50px;
+  }
+
+  .search-btn-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .hero-search-hint {
+    font-size: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .quick-access {
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  .quick-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .quick-btn-icon {
+    font-size: 1rem;
   }
 
   .header-container {
@@ -1873,4 +1992,3 @@ $light_gray: #eee;
   }
 }
 </style>
-
