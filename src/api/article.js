@@ -178,10 +178,9 @@ export function rateArticle(id, rating) {
   })
 }
 
-// Gallery operations
 export function getArticleBySlug(slug) {
   return request({
-    url: `/articles/${slug}`,
+    url: `/view/articles/${slug}`,
     method: 'get'
   })
 }
@@ -226,5 +225,20 @@ export const updateAdminArticleImage = (id, data) => {
     url: `/admin/articles/images/${id}`,
     method: 'PUT',
     data
+  })
+}
+
+export function createEditorArticle(data) {
+  return request({
+    url: '/editor/articles',
+    method: 'post',
+    data
+  })
+}
+
+export function getEditoArticles(id) {
+  return request({
+    url: `/articles/${id}`,
+    method: 'get'
   })
 }

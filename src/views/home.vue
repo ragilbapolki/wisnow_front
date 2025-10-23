@@ -73,32 +73,6 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <!-- <el-dropdown trigger="click">
-            <el-button type="primary">
-              <span class="el-dropdown-link user-info">
-                <img
-                  :src="user.avatar || '/default-avatar.png'"
-                  :alt="user.name"
-                  class="user-avatar"
-                />
-                <span class="user-name">{{ user.name }}</span>
-              </span><el-icon class="el-icon--right"><arrow-down /></el-icon>
-            </el-button>
-
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item v-if="user.role === 'admin'">
-                    <router-link to="/admin/dashboard" class="dropdown-link">
-                      🏛️ Admin Dashboard
-                    </router-link>
-                  </el-dropdown-item>
-
-                  <el-dropdown-item divided @click="handleLogout">
-                    🚪 Logout
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown> -->
           </div>
 
           <button v-else @click="openLoginModal" class="login-button">
@@ -214,12 +188,6 @@
           </div>
         </div>
 
-        <!-- Welcome Text -->
-        <!-- <h2 class="welcome-title">
-          Selamat Datang di <span class="highlight">WISMILAK</span><br />
-          Knowledge Base
-        </h2> -->
-
         <!-- Feature Cards -->
         <div class="feature-cards">
           <div class="feature-card">
@@ -240,19 +208,6 @@
             <p class="feature-desc">Konten berkualitas</p>
           </div>
         </div>
-
-        <!-- CTA Button -->
-        <!-- <router-link to="/articles" class="cta-button">
-          Jelajahi Knowledge Base
-          <svg class="cta-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M17 8l4 4m0 0l-4 4m4-4H3"
-            ></path>
-          </svg>
-        </router-link> -->
       </div>
     </section>
 
@@ -361,7 +316,7 @@
       </div>
     </section>
 
-    <!-- Categories Section -->
+    <!-- Categories Section with Slider -->
     <section class="categories-section" id="categories">
       <div class="section-container">
         <div class="section-header-center">
@@ -372,17 +327,43 @@
           <div class="spinner"></div>
         </div>
 
-        <div v-else class="categories-grid">
-          <router-link
-            v-for="category in categories"
-            :key="category.id"
-            :to="{ name: 'PublicArticleList', query: { category: category.slug } }"
-            class="category-card"
+        <div v-else class="categories-slider-container">
+          <button
+            @click="scrollCategories('left')"
+            class="slider-nav-button slider-nav-left"
+            :disabled="isAtStart"
+            v-if="categories.length > 6"
           >
-            <div class="category-icon">{{ getCategoryIcon(category.name) }}</div>
-            <h3 class="category-name">{{ category.name }}</h3>
-            <p class="category-count">{{ formatNumber(category.articles_count) }} artikel</p>
-          </router-link>
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <div class="categories-slider-wrapper">
+            <div class="categories-slider" ref="categoriesSlider" @scroll="updateSliderButtons">
+              <router-link
+                v-for="category in categories"
+                :key="category.id"
+                :to="{ name: 'PublicArticleList', query: { category: category.slug } }"
+                class="category-card"
+              >
+                <div class="category-icon">{{ getCategoryIcon(category.name) }}</div>
+                <h3 class="category-name">{{ category.name }}</h3>
+                <p class="category-count">{{ formatNumber(category.articles_count) }} artikel</p>
+              </router-link>
+            </div>
+          </div>
+
+          <button
+            @click="scrollCategories('right')"
+            class="slider-nav-button slider-nav-right"
+            :disabled="isAtEnd"
+            v-if="categories.length > 6"
+          >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       </div>
     </section>
@@ -424,6 +405,9 @@ const activeTab = ref('popular')
 // Categories State
 const categories = ref([])
 const categoriesLoading = ref(false)
+const categoriesSlider = ref(null)
+const isAtStart = ref(true)
+const isAtEnd = ref(false)
 
 // Login Form
 const loginForm = reactive({
@@ -485,30 +469,25 @@ const handleLogin = () => {
         .then((res) => {
           console.log('✅ Login Response:', res.data)
 
-          // Get data from response
           const responseData = res.data?.data || res.data
           const token = responseData.token
           const userData = responseData.user
 
-          // 1. Save token FIRST
           if (token) {
             localStorage.setItem('token', token)
             dispatch.user.setToken(token)
             console.log('✅ Token saved')
           }
 
-          // 2. Save user data SECOND
           if (userData) {
-            // Pastikan user punya role
             if (!userData.role) {
-              userData.role = 'user' // default role
+              userData.role = 'user'
             }
 
             localStorage.setItem('user', JSON.stringify(userData))
             console.log('💾 User saved:', userData)
           }
 
-          // 3. Verify saved data
           const verifyToken = localStorage.getItem('token')
           const verifyUser = localStorage.getItem('user')
           console.log('Verify - Token:', verifyToken ? 'exists' : 'not found')
@@ -519,11 +498,9 @@ const handleLogin = () => {
 
           ElMessage.success('Login berhasil!')
 
-          // 4. Use window.location instead of router.push to ensure fresh state
           const userRole = userData?.role
           const redirect = route.query.redirect
 
-          // Wait untuk ensure localStorage saved
           setTimeout(() => {
             if (redirect && redirect !== '/') {
               window.location.href = redirect
@@ -532,10 +509,9 @@ const handleLogin = () => {
             } else if (userRole === 'editor') {
               window.location.href = '/admin/articles/list'
             } else {
-              // Stay on home but reload to refresh user info
               window.location.reload()
             }
-          }, 200) // Small delay to ensure save completes
+          }, 200)
         })
         .catch((error) => {
           console.error('❌ Login error:', error)
@@ -566,10 +542,45 @@ const scrollToCategories = () => {
   }
 }
 
+// ✅ Fixed: Redirect ke ArticleList dengan search query
 const handleSearch = () => {
   if (searchQuery.value.trim()) {
-    router.push({ name: 'ArticleList', query: { search: searchQuery.value } })
+    router.push({
+      name: 'PublicArticleList',
+      query: { search: searchQuery.value.trim() }
+    })
   }
+}
+
+// Categories Slider Methods
+const scrollCategories = (direction) => {
+  const slider = categoriesSlider.value
+  if (!slider) return
+
+  // Lebar satu card + gap
+  const cardWidth = 220 // 200px width + 20px gap (dari min-width category-card)
+  const scrollAmount = cardWidth * 3 // Scroll 3 cards at a time
+
+  const newScrollLeft = direction === 'left'
+    ? slider.scrollLeft - scrollAmount
+    : slider.scrollLeft + scrollAmount
+
+  slider.scrollTo({
+    left: newScrollLeft,
+    behavior: 'smooth'
+  })
+
+  setTimeout(() => {
+    updateSliderButtons()
+  }, 300)
+}
+
+const updateSliderButtons = () => {
+  const slider = categoriesSlider.value
+  if (!slider) return
+
+  isAtStart.value = slider.scrollLeft <= 10 // Toleransi 10px
+  isAtEnd.value = slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 10
 }
 
 // Articles Methods
@@ -583,7 +594,6 @@ const loadPopularArticles = async () => {
       limit: 6
     })
 
-    // ✅ API mengembalikan pagination Laravel: response.data.data
     featuredArticles.value = response.data?.data || response.data || []
     articlesLoading.value = false
   } catch (error) {
@@ -638,8 +648,13 @@ const loadCategories = async () => {
   try {
     const response = await getCategories()
     console.info(response)
-    categories.value = response || []
+    categories.value = response.data || response || []
     categoriesLoading.value = false
+
+    // Update slider buttons after categories loaded
+    nextTick(() => {
+      updateSliderButtons()
+    })
   } catch (error) {
     console.error('Error loading categories:', error)
     ElMessage.error('Gagal memuat kategori')
@@ -648,7 +663,6 @@ const loadCategories = async () => {
 }
 
 const formatRating = (rating) => {
-  // Konversi ke number dengan aman
   if (rating === null || rating === undefined || rating === '') {
     return '0.0';
   }
@@ -689,9 +703,9 @@ const getCategoryIcon = (name) => {
     'Kebijakan': '⚖️',
     'FAQ': '❓',
     'Best Practices': '⭐',
-    'Teknis': '⚙️',
+    'Technical Support': '⚙️',
     'HR': '👥',
-    'IT': '💻',
+    'IT Development': '💻',
     'SDM & Kepegawaian': '👥',
     'Keuangan': '💰',
     'Marketing': '📢',
@@ -700,7 +714,8 @@ const getCategoryIcon = (name) => {
     'Quality Control': '✅',
     'Research & Development': '🔬',
     'Legal': '⚖️',
-    'Customer Service': '🤝'
+    'Customer Service': '🤝',
+    'SAP' : '🧩'
   }
   return iconMap[name] || '📄'
 }
@@ -709,6 +724,12 @@ const getCategoryIcon = (name) => {
 onMounted(() => {
   loadPopularArticles()
   loadCategories()
+
+  // Add scroll listener for slider
+  const slider = categoriesSlider.value
+  if (slider) {
+    slider.addEventListener('scroll', updateSliderButtons)
+  }
 })
 
 const onLogout = async () => {
@@ -730,7 +751,6 @@ $cursor: #fff;
   }
 }
 
-/* reset element-ui css */
 .login-container {
   .el-input {
     .el-input__wrapper {
@@ -1560,13 +1580,79 @@ $light_gray: #eee;
   margin-bottom: 3rem;
 }
 
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+/* Categories Slider Container */
+.categories-slider-container {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.categories-slider-wrapper {
+  overflow: hidden;
+  padding: 0 3rem;
+}
+
+.categories-slider {
+  display: flex;
   gap: 1.5rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 1rem 0;
+}
+
+.categories-slider::-webkit-scrollbar {
+  display: none;
+}
+
+/* Slider Navigation Buttons */
+.slider-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.slider-nav-button:hover:not(:disabled) {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: white;
+  box-shadow: 0 6px 12px rgba(22, 163, 74, 0.3);
+}
+
+.slider-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.slider-nav-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.slider-nav-left {
+  left: 0;
+}
+
+.slider-nav-right {
+  right: 0;
 }
 
 .category-card {
+  flex: 0 0 200px;
+  min-width: 200px;
   background: white;
   border-radius: 1rem;
   padding: 2rem 1rem;
@@ -1690,12 +1776,27 @@ $light_gray: #eee;
     grid-template-columns: 1fr;
   }
 
-  .categories-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .hero-section {
     padding: 6rem 1rem 4rem;
+  }
+
+  .categories-slider-wrapper {
+    padding: 0 2.5rem;
+  }
+
+  .category-card {
+    flex: 0 0 180px;
+    min-width: 180px;
+  }
+
+  .slider-nav-button {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .slider-nav-button svg {
+    width: 1rem;
+    height: 1rem;
   }
 }
 
@@ -1710,10 +1811,6 @@ $light_gray: #eee;
 
   .welcome-title {
     font-size: 1.75rem;
-  }
-
-  .categories-grid {
-    grid-template-columns: 1fr;
   }
 
   .header-container {
@@ -1742,26 +1839,38 @@ $light_gray: #eee;
   .modal-content {
     margin: 0.5rem;
   }
-}
 
-.user-info {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-}
+  .categories-slider-wrapper {
+    padding: 0 2rem;
+  }
 
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 8px;
-}
+  .category-card {
+    flex: 0 0 150px;
+    min-width: 150px;
+    padding: 1.5rem 0.75rem;
+  }
 
-.user-name {
-  font-weight: 500;
-  margin-right: 4px;
-  color: #333;
+  .category-icon {
+    font-size: 2.5rem;
+  }
+
+  .category-name {
+    font-size: 0.875rem;
+  }
+
+  .category-count {
+    font-size: 0.75rem;
+  }
+
+  .slider-nav-button {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .slider-nav-button svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
 }
 </style>
+

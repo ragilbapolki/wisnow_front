@@ -81,10 +81,8 @@
               <el-select v-model="filters.type" @change="applyFilters" >
                 <el-option value="">Semua Tipe</el-option>
                 <el-option value="SOP">📋 SOP</el-option>
-                <el-option value="Panduan">📖 Panduan</el-option>
-                <el-option value="Tutorial">🎓 Tutorial</el-option>
                 <el-option value="Kebijakan">⚖️ Kebijakan</el-option>
-                <el-option value="Artikel">📄 Artikel</el-option>
+                <el-option value="Panduan">📖 Panduan</el-option>
               </el-select>
             </div>
 
@@ -387,7 +385,7 @@ const loadArticles = async () => {
 const loadCategories = async () => {
   try {
     const response = await getCategories()
-    categories.value = response || []
+    categories.value = response.data || response || []
   } catch (error) {
     console.error('Error loading categories:', error)
   }

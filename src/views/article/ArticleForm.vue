@@ -79,7 +79,7 @@
                   :on-remove="handleRemove"
                   :on-preview="handlePreview"
                   :before-upload="beforeUpload"
-                  :limit="20"
+                  :limit="25"
                   :on-exceed="handleExceed"
                   list-type="picture-card"
                   multiple
@@ -93,7 +93,7 @@
                 <div class="upload-tips">
                   <el-text size="small" type="info">
                     <el-icon><InfoFilled /></el-icon>
-                    Support JPG, PNG, GIF formats. Max 5MB per image. Maximum 20 images.
+                    Support JPG, PNG, GIF formats. Max 5MB per image. Maximum 25 images.
                   </el-text>
                 </div>
 
@@ -448,8 +448,8 @@ import {
   Lock
 } from '@element-plus/icons-vue'
 import {
-  getAdminArticle,
-  createAdminArticle,
+  getEditoArticles,
+  createEditorArticle,
   updateAdminArticle,
   uploadArticleImage,
   deleteArticleImage,
@@ -458,7 +458,7 @@ import {
   updateAdminArticleImage
 } from '@/api/article'
 import { getCategories } from '@/api/article'
-import { getAdminDivisions } from '@/api/division'
+import { getDivisions } from '@/api/division'
 import { QuillEditor } from '@vueup/vue-quill'
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
 
@@ -934,7 +934,7 @@ const handlePreview = (file) => {
 }
 
 const handleExceed = (files, fileList) => {
-  ElMessage.warning(`Maximum 20 images allowed. You selected ${files.length} files, current total: ${fileList.length}`)
+  ElMessage.warning(`Maximum 25 images allowed. You selected ${files.length} files, current total: ${fileList.length}`)
 }
 
 const temporaryImages = ref([])
@@ -953,7 +953,7 @@ const fetchCategories = async () => {
 
 const fetchDivisionsAndDepartments = async () => {
   try {
-    const response = await getAdminDivisions()
+    const response = await getDivisions()
     if (response.success !== false) {
       const allData = response.data || response || []
 
@@ -972,7 +972,7 @@ const fetchArticle = async () => {
 
   formLoading.value = true
   try {
-    const response = await getAdminArticle(articleId.value)
+    const response = await getEditoArticles(articleId.value)
 
     if (response.success !== false) {
       const data = response.article || response
@@ -1095,7 +1095,7 @@ const handleSubmit = async (publishAfterSave = false) => {
         formData.append('attachment', attachmentFile.value)
       }
 
-      response = await createAdminArticle(formData)
+      response = await createEditorArticle(formData)
 
       if (response.success !== false && uploadedImages.value.length > 0) {
         const newArticleId = response.id || response.data.id

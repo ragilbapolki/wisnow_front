@@ -10,6 +10,14 @@ export function getAdminDivisions(params) {
   })
 }
 
+export function getDivisions(params) {
+  return request({
+    url: '/divisions',
+    method: 'get',
+    params
+  })
+}
+
 export function getAdminDivision(id) {
   return request({
     url: `/admin/divisions/${id}`,

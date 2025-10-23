@@ -1,4 +1,3 @@
-<!-- ArtikelDetail.vue - Complete Version with Access Control -->
 <template>
   <div class="article-detail-page">
     <header class="main-header">
@@ -36,32 +35,6 @@
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
-            <!-- <el-dropdown trigger="click">
-            <el-button type="primary">
-              <span class="el-dropdown-link user-info">
-                <img
-                  :src="user.avatar || '/default-avatar.png'"
-                  :alt="user.name"
-                  class="user-avatar"
-                />
-                <span class="user-name">{{ user.name }}</span>
-              </span><el-icon class="el-icon--right"><arrow-down /></el-icon>
-            </el-button>
-
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item v-if="user.role === 'admin'">
-                    <router-link to="/admin/dashboard" class="dropdown-link">
-                      🏛️ Admin Dashboard
-                    </router-link>
-                  </el-dropdown-item>
-
-                  <el-dropdown-item divided @click="handleLogout">
-                    🚪 Logout
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown> -->
           </div>
 
           <button v-else @click="openLoginModal" class="login-button">
@@ -103,7 +76,6 @@
         <h2>Akses Ditolak</h2>
         <p class="access-denied-message">{{ accessDeniedMessage }}</p>
 
-        <!-- Show allowed divisions/departments if available -->
         <div v-if="deniedArticleInfo" class="access-info">
           <p class="access-info-title">Artikel ini hanya dapat diakses oleh:</p>
           <div class="access-tags">
@@ -145,7 +117,6 @@
             </span>
             <span class="category-badge">{{ article.category?.name }}</span>
 
-            <!-- Private Badge -->
             <span v-if="article.visibility === 'private'" class="visibility-badge private">
               🔒 Private
             </span>
@@ -156,7 +127,7 @@
 
           <h1 class="article-title">{{ article.title }}</h1>
 
-          <!-- Author Info -->
+          <!-- Author Section -->
           <div class="author-section">
             <img
               :src="article.user?.avatar_url || '/default-avatar.png'"
@@ -172,22 +143,70 @@
             </div>
           </div>
 
-          <!-- Article Stats -->
-          <div class="article-stats">
-            <div class="stat-item">
-              <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-              </svg>
-              <span>{{ article.view_count }}</span>
+          <!-- Article Stats Enhanced -->
+          <div class="article-stats-enhanced">
+            <div class="stat-card">
+              <div class="stat-icon-wrapper views">
+                <svg class="stat-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ article.view_count }}</span>
+                <span class="stat-label">Total Views</span>
+              </div>
             </div>
-            <div class="stat-item">
-              <svg class="stat-icon" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+
+            <div class="stat-card clickable" @click="toggleRatingHistory">
+              <div class="stat-icon-wrapper rating">
+                <svg class="stat-icon" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+              </div>
+              <div class="stat-content">
+                <span class="stat-value">{{ formatRating(article.rating) }}</span>
+                <span class="stat-label">{{ article.rating_count }} Ratings</span>
+              </div>
+              <svg class="expand-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="showRatingHistory ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'"></path>
               </svg>
-              <span>{{ formatRating(article.rating) }} ({{ article.rating_count }})</span>
             </div>
           </div>
+
+          <!-- Rating History Panel -->
+          <transition name="slide-down">
+            <div v-if="showRatingHistory" class="rating-history-panel">
+              <div class="rating-history-header">
+                <h3>📊 Rating Distribution</h3>
+                <button @click="showRatingHistory = false" class="close-history-btn">×</button>
+              </div>
+              <div class="rating-distribution">
+                <div v-for="star in [5, 4, 3, 2, 1]" :key="star" class="distribution-row">
+                  <div class="star-label">
+                    <svg class="star-icon-small" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                    </svg>
+                    <span>{{ star }}</span>
+                  </div>
+                  <div class="distribution-bar-container">
+                    <div class="distribution-bar" :style="{ width: getRatingPercentage(star) + '%', backgroundColor: getBarColor(star) }"></div>
+                  </div>
+                  <span class="distribution-count">{{ getRatingCount(star) }}</span>
+                </div>
+              </div>
+              <div class="rating-summary">
+                <div class="summary-item">
+                  <span class="summary-label">Average Rating</span>
+                  <span class="summary-value">{{ formatRating(article.rating) }}/5.0</span>
+                </div>
+                <div class="summary-item">
+                  <span class="summary-label">Total Reviews</span>
+                  <span class="summary-value">{{ article.rating_count }}</span>
+                </div>
+              </div>
+            </div>
+          </transition>
 
           <!-- Action Buttons -->
           <div class="action-buttons">
@@ -207,7 +226,7 @@
 
           <!-- PDF Attachment Section -->
           <div v-if="article.attachment_path" class="attachment-section">
-            <h2 class="section-title">Lampiran Dokumen</h2>
+            <h2 class="section-title">📎 Lampiran Dokumen</h2>
             <div class="attachment-card">
               <div class="attachment-header">
                 <div class="attachment-icon">
@@ -232,7 +251,6 @@
                 </button>
               </div>
 
-              <!-- PDF Preview -->
               <div class="pdf-preview">
                 <iframe
                   :src="getPdfUrl()"
@@ -245,7 +263,7 @@
 
           <!-- Gallery Section -->
           <div v-if="galleryImages.length > 0" class="gallery-section">
-            <h2 class="section-title">Gambar</h2>
+            <h2 class="section-title">🖼️ Gambar</h2>
             <div class="gallery-grid">
               <div
                 v-for="(image, index) in galleryImages"
@@ -269,49 +287,102 @@
           <!-- Article Content -->
           <div class="article-content" ref="articleContentRef" v-html="article.content"></div>
 
-          <!-- Rating Section -->
-          <div class="rating-section">
-            <h2 class="section-title">Beri Rating</h2>
-            <div class="rating-display">
-              <el-rate
-                v-model="userRating.rating"
-                :size="'large'"
-                show-text
-                :texts="['Sangat Buruk', 'Buruk', 'Cukup', 'Baik', 'Sangat Baik']"
-                :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
-              />
-            </div>
-          </div>
+          <!-- Rating & Comment Section Enhanced -->
+          <div class="rating-comment-section">
+            <h2 class="section-title">
+              <svg class="section-icon" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+              </svg>
+              Beri Rating & Komentar
+            </h2>
 
-          <!-- Comments Section -->
-          <div class="comments-section">
-            <h2 class="section-title">Komentar ({{ article.ratings?.length || 0 }})</h2>
+            <div v-if="isAuthenticated" class="rating-form-card">
+              <div class="rating-input-wrapper">
+                <label class="rating-label">
+                  <svg class="label-icon" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                  </svg>
+                  Rating Anda:
+                </label>
+                <el-rate
+                  v-model="userRating.rating"
+                  :size="'large'"
+                  show-text
+                  :texts="['Sangat Buruk', 'Buruk', 'Cukup', 'Baik', 'Sangat Baik']"
+                  :colors="['#99A9BF', '#F7BA2A', '#FF9900']"
+                />
+              </div>
 
-            <div class="comment-form" v-if="isAuthenticated">
-              <textarea
-                v-model="userRating.comment"
-                placeholder="Tulis komentar Anda..."
-                class="comment-input"
-                rows="4"
-              ></textarea>
-              <button
-                @click="submitRating"
-                class="btn-submit-comment"
-                :disabled="submittingRating"
-              >
-                {{ submittingRating ? 'Mengirim...' : 'Kirim Komentar' }}
-              </button>
+              <div class="comment-input-wrapper">
+                <label class="comment-label">
+                  <svg class="label-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                  </svg>
+                  Komentar (Opsional):
+                </label>
+                <textarea
+                  v-model="userRating.comment"
+                  placeholder="Bagikan pengalaman Anda dengan artikel ini..."
+                  class="comment-input"
+                  rows="4"
+                ></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button
+                  @click="submitRating"
+                  class="btn-submit-rating"
+                  :disabled="submittingRating || !userRating.rating"
+                >
+                  <svg v-if="!submittingRating" class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <div v-else class="spinner-small"></div>
+                  {{ submittingRating ? 'Mengirim...' : 'Kirim Rating & Komentar' }}
+                </button>
+                <p class="helper-text">
+                  💡 Rating Anda akan membantu pengguna lain menemukan artikel berkualitas
+                </p>
+              </div>
             </div>
 
             <div v-else class="login-prompt">
-              <p>Silakan <a href="#" @click.prevent="openLoginModal">login</a> untuk memberikan komentar</p>
+              <svg class="prompt-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+              <p>Silakan <a href="#" @click.prevent="openLoginModal" class="login-link">login</a> untuk memberikan rating dan komentar</p>
+            </div>
+
+            <!-- Comments List -->
+            <div class="comments-header">
+              <h3 class="comments-title">
+                💬 Komentar & Review ({{ article.ratings?.length || 0 }})
+              </h3>
+              <div class="comments-filter">
+                <button
+                  :class="['filter-btn', { active: commentFilter === 'all' }]"
+                  @click="commentFilter = 'all'"
+                >
+                  Semua
+                </button>
+                <button
+                  :class="['filter-btn', { active: commentFilter === 'with-comment' }]"
+                  @click="commentFilter = 'with-comment'"
+                >
+                  Dengan Komentar
+                </button>
+              </div>
             </div>
 
             <div class="comments-list">
-              <div class="comment-item" v-for="rating in article.ratings" :key="rating.id">
+              <div
+                class="comment-item"
+                v-for="rating in filteredComments"
+                :key="rating.id"
+              >
                 <div class="comment-avatar-wrapper">
                   <div class="comment-avatar">
-                    {{ rating.user?.name?.charAt(0) || 'S' }}
+                    {{ rating.user?.name?.charAt(0) || 'U' }}
                   </div>
                 </div>
                 <div class="comment-content">
@@ -328,8 +399,16 @@
                       score-template="{value}"
                     />
                   </div>
-                  <p class="comment-text">{{ rating.comment }}</p>
+                  <p v-if="rating.comment" class="comment-text">{{ rating.comment }}</p>
+                  <p v-else class="comment-text-empty">Tidak ada komentar</p>
                 </div>
+              </div>
+
+              <div v-if="filteredComments.length === 0" class="no-comments">
+                <svg class="no-comments-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                </svg>
+                <p>Belum ada {{ commentFilter === 'with-comment' ? 'komentar' : 'review' }}</p>
               </div>
             </div>
           </div>
@@ -339,7 +418,7 @@
         <aside class="sidebar">
           <!-- Related Articles -->
           <div class="sidebar-card">
-            <h3 class="sidebar-title">Artikel Terkait</h3>
+            <h3 class="sidebar-title">📚 Artikel Terkait</h3>
             <div class="related-articles">
               <router-link
                 v-for="related in relatedArticles"
@@ -359,7 +438,7 @@
 
           <!-- Document Info -->
           <div class="sidebar-card">
-            <h3 class="sidebar-title">Informasi Dokumen</h3>
+            <h3 class="sidebar-title">ℹ️ Informasi Dokumen</h3>
             <div class="info-list">
               <div class="info-item">
                 <span class="info-label">Dibuat pada</span>
@@ -395,9 +474,9 @@
             </div>
           </div>
 
-          <!-- Access Info (for private articles) -->
+          <!-- Access Info -->
           <div v-if="article.visibility === 'private'" class="sidebar-card access-card">
-            <h3 class="sidebar-title">Akses Terbatas</h3>
+            <h3 class="sidebar-title">🔐 Akses Terbatas</h3>
             <div class="access-list">
               <div v-if="article.divisions && article.divisions.length > 0" class="access-group">
                 <span class="access-group-label">Divisi:</span>
@@ -453,11 +532,9 @@ import { getArticleBySlug, rateArticle, getArticleGallery } from '@/api/article'
 import { ElMessage } from 'element-plus'
 import { dispatch, ctx } from '@/store'
 
-// Import highlight.js
 import hljs from 'highlight.js'
 import 'highlight.js/styles/atom-one-dark.css'
 
-// Register languages
 import javascript from 'highlight.js/lib/languages/javascript'
 import python from 'highlight.js/lib/languages/python'
 import php from 'highlight.js/lib/languages/php'
@@ -489,19 +566,57 @@ const galleryModalOpen = ref(false)
 const currentGalleryIndex = ref(0)
 const articleContentRef = ref(null)
 
-// Access denied state
 const accessDenied = ref(false)
 const accessDeniedMessage = ref('')
 const deniedArticleInfo = ref(null)
 
-// Rating state
 const userRating = ref({
   rating: 5,
   comment: ''
 })
 const submittingRating = ref(false)
 
-// Detect if text is code
+// New refs for enhanced features
+const showRatingHistory = ref(false)
+const commentFilter = ref('all')
+
+// Computed
+const filteredComments = computed(() => {
+  if (!article.value?.ratings) return []
+  if (commentFilter.value === 'all') {
+    return article.value.ratings
+  }
+  return article.value.ratings.filter(r => r.comment && r.comment.trim() !== '')
+})
+
+// Rating distribution functions
+const getRatingCount = (star) => {
+  if (!article.value?.ratings) return 0
+  return article.value.ratings.filter(r => r.rating === star).length
+}
+
+const getRatingPercentage = (star) => {
+  const total = article.value?.rating_count || 0
+  if (total === 0) return 0
+  const count = getRatingCount(star)
+  return Math.round((count / total) * 100)
+}
+
+const getBarColor = (star) => {
+  const colors = {
+    5: '#16a34a',
+    4: '#84cc16',
+    3: '#eab308',
+    2: '#f97316',
+    1: '#ef4444'
+  }
+  return colors[star] || '#9ca3af'
+}
+
+const toggleRatingHistory = () => {
+  showRatingHistory.value = !showRatingHistory.value
+}
+
 const isCodeLike = (text) => {
   const codePatterns = [
     /var\s+\w+\s*=/,
@@ -521,11 +636,9 @@ const isCodeLike = (text) => {
     /def\s+\w+\(/,
     /import\s+/
   ]
-
   return codePatterns.some(pattern => pattern.test(text))
 }
 
-// Auto-detect programming language
 const detectLanguage = (text) => {
   if (text.includes('<?php')) return 'php'
   if (text.match(/SELECT.*FROM/i) || text.includes('INSERT INTO')) return 'sql'
@@ -534,11 +647,9 @@ const detectLanguage = (text) => {
   if (text.includes('function') || text.includes('const ') || text.includes('let ') || text.includes('var ')) return 'javascript'
   if (text.includes('{') && text.includes('}') && text.includes(':')) return 'json'
   if (text.includes('#!/bin/bash') || text.includes('sudo ') || text.includes('apt-get')) return 'bash'
-
   return 'javascript'
 }
 
-// Convert plain text code to formatted code block
 const convertToCodeBlock = (element) => {
   const text = element.textContent.trim()
   const pre = document.createElement('pre')
@@ -553,23 +664,15 @@ const convertToCodeBlock = (element) => {
   return pre
 }
 
-// Highlight code blocks function
 const highlightCodeBlocks = () => {
   if (!articleContentRef.value) {
-    console.warn('⏳ articleContentRef not ready, retrying...')
     setTimeout(highlightCodeBlocks, 100)
     return
   }
 
-  console.log('🎨 Starting code highlighting...')
-
   const preElements = articleContentRef.value.querySelectorAll('pre')
-  console.log(`Found ${preElements.length} pre elements`)
-
-  preElements.forEach((pre, index) => {
-    if (pre.classList.contains('code-highlighted')) {
-      return
-    }
+  preElements.forEach((pre) => {
+    if (pre.classList.contains('code-highlighted')) return
 
     pre.classList.add('code-highlighted')
     pre.classList.remove('ql-syntax')
@@ -589,9 +692,8 @@ const highlightCodeBlocks = () => {
 
     try {
       hljs.highlightElement(code)
-      console.log(`✅ Highlighted pre block ${index + 1} (${language})`)
     } catch (error) {
-      console.error(`Error highlighting block ${index + 1}:`, error)
+      console.error('Error highlighting:', error)
     }
 
     if (!pre.querySelector('.code-copy-btn')) {
@@ -600,28 +702,21 @@ const highlightCodeBlocks = () => {
   })
 
   const textElements = articleContentRef.value.querySelectorAll('p, div:not(.article-content)')
-
-  textElements.forEach((element, index) => {
-    if (element.closest('pre') || element.classList.contains('code-checked')) {
-      return
-    }
+  textElements.forEach((element) => {
+    if (element.closest('pre') || element.classList.contains('code-checked')) return
 
     element.classList.add('code-checked')
     const text = element.textContent.trim()
 
     if (isCodeLike(text) && text.length > 10) {
-      console.log(`📝 Converting text element ${index + 1} to code block`)
       const pre = convertToCodeBlock(element)
-
       const code = pre.querySelector('code')
       if (code) {
         try {
           hljs.highlightElement(code)
-          console.log(`✅ Highlighted converted block ${index + 1}`)
         } catch (error) {
-          console.error(`Error highlighting converted block:`, error)
+          console.error('Error highlighting converted block:', error)
         }
-
         if (!pre.querySelector('.code-copy-btn')) {
           addCopyButton(pre, code)
         }
@@ -629,6 +724,7 @@ const highlightCodeBlocks = () => {
     }
   })
 }
+
 const addCopyButton = (pre, code) => {
   const button = document.createElement('button')
   button.className = 'code-copy-btn'
@@ -672,21 +768,12 @@ const addCopyButton = (pre, code) => {
   pre.appendChild(button)
 }
 
-// Check if user can access private article
 const canAccessPrivateArticle = (articleData) => {
-  if (articleData.visibility === 'public') {
-    return true
-  }
-
-  if (!isAuthenticated.value) {
-    return false
-  }
+  if (articleData.visibility === 'public') return true
+  if (!isAuthenticated.value) return false
 
   const currentUser = user.value
-
-  if (currentUser.role === 'admin') {
-    return true
-  }
+  if (currentUser.role === 'admin') return true
 
   const allowedDivisions = articleData.divisions?.map(d => d.id) || []
   const hasDivisionAccess = allowedDivisions.includes(currentUser.divisi_id)
@@ -752,17 +839,26 @@ const submitRating = async () => {
 
   submittingRating.value = true
   try {
-    await rateArticle(article.value.id, {
+    const response = await rateArticle(article.value.id, {
       rating: userRating.value.rating,
       comment: userRating.value.comment
     })
 
-    ElMessage.success('Penilaian berhasil disimpan')
-    await loadArticle()
+    ElMessage.success('Rating dan komentar berhasil disimpan')
+
+    // Update article with new ratings data from response
+    if (response.data?.article) {
+      article.value = response.data.article
+    } else {
+      // Fallback: reload entire article
+      await loadArticle()
+    }
+
+    // Reset form
     userRating.value = { rating: 5, comment: '' }
   } catch (error) {
     console.error('Error submitting rating:', error)
-    ElMessage.error('Gagal menyimpan penilaian')
+    ElMessage.error(error.response?.data?.message || 'Gagal menyimpan rating')
   } finally {
     submittingRating.value = false
   }
@@ -850,8 +946,9 @@ const loadArticle = async () => {
 
   try {
     const response = await getArticleBySlug(route.params.slug)
-    console.info(response)
     const data = response.data || response
+
+    console.log('📄 Article loaded:', data)
 
     if (response.success === false && response.message) {
       accessDenied.value = true
@@ -862,7 +959,6 @@ const loadArticle = async () => {
 
     article.value = data.article
 
-    // Check access permission
     if (!canAccessPrivateArticle(article.value)) {
       accessDenied.value = true
       deniedArticleInfo.value = {
@@ -896,7 +992,7 @@ const loadArticle = async () => {
     }, 200)
 
   } catch (error) {
-    console.error('Error loading article:', error)
+    console.error('❌ Error loading article:', error)
 
     if (error.response?.status === 403) {
       accessDenied.value = true
@@ -932,6 +1028,7 @@ const loadGallery = async () => {
 onMounted(() => {
   loadArticle()
 })
+
 </script>
 
 <style scoped>
@@ -1008,10 +1105,6 @@ onMounted(() => {
   background: #f9fafb;
 }
 
-.user-info:hover .user-dropdown {
-  display: block;
-}
-
 .user-avatar {
   width: 2rem;
   height: 2rem;
@@ -1023,33 +1116,6 @@ onMounted(() => {
   font-size: 0.875rem;
   font-weight: 500;
   color: #111827;
-}
-
-.user-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 0.5rem;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  min-width: 200px;
-  z-index: 50;
-}
-
-.dropdown-item {
-  display: block;
-  padding: 0.75rem 1rem;
-  color: #374151;
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: background 0.2s;
-}
-
-.dropdown-item:hover {
-  background: #f9fafb;
 }
 
 /* Breadcrumb */
@@ -1105,6 +1171,16 @@ onMounted(() => {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.spinner-small {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid #ffffff40;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
 }
 
 /* Access Denied */
@@ -1362,24 +1438,230 @@ onMounted(() => {
   color: #6b7280;
 }
 
-/* Stats */
-.article-stats {
-  display: flex;
-  gap: 1.5rem;
+/* Enhanced Stats */
+.article-stats-enhanced {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
   margin-bottom: 1.5rem;
 }
 
-.stat-item {
+.stat-card {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: all 0.3s;
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+}
+
+.stat-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
+}
+
+.stat-icon-wrapper {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon-wrapper.views {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.stat-icon-wrapper.rating {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
 }
 
 .stat-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #374151;
+}
+
+.stat-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.expand-icon {
   width: 1.25rem;
   height: 1.25rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+/* Rating History Panel */
+.slide-down-enter-active,
+.slide-down-leave-active {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.slide-down-enter-from,
+.slide-down-leave-to {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.slide-down-enter-to,
+.slide-down-leave-from {
+  max-height: 600px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.rating-history-panel {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.rating-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.rating-history-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.close-history-btn {
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b7280;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-history-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.rating-distribution {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.distribution-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.star-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 2.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.star-icon-small {
+  width: 1rem;
+  height: 1rem;
+  color: #fbbf24;
+}
+
+.distribution-bar-container {
+  flex: 1;
+  height: 0.75rem;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.distribution-bar {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+
+.distribution-count {
+  min-width: 2.5rem;
+  text-align: right;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.rating-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
 }
 
 /* Action Buttons */
@@ -1405,6 +1687,7 @@ onMounted(() => {
 
 .btn-action:hover {
   background: #f9fafb;
+  border-color: #d1d5db;
 }
 
 .btn-icon {
@@ -1422,6 +1705,14 @@ onMounted(() => {
   font-weight: 600;
   margin-bottom: 1rem;
   color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-icon {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .attachment-card {
@@ -1786,64 +2077,186 @@ onMounted(() => {
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* Rating Section */
-.rating-section {
-  margin: 2rem 0;
+/* Rating & Comment Section Enhanced */
+.rating-comment-section {
+  margin: 3rem 0;
   padding: 2rem 0;
-  border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  border-top: 2px solid #e5e7eb;
 }
 
-.rating-display {
-  text-align: left;
-}
-
-/* Comments Section */
-.comments-section {
-  margin: 2rem 0;
-}
-
-.comment-form {
+.rating-form-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 2rem;
   margin-bottom: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.rating-input-wrapper,
+.comment-input-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.rating-label,
+.comment-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.label-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6b7280;
 }
 
 .comment-input {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
+  padding: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
   font-size: 0.875rem;
   font-family: inherit;
   resize: vertical;
-  margin-bottom: 1rem;
+  transition: all 0.2s;
+  background: white;
 }
 
 .comment-input:focus {
   outline: none;
-  border-color: #9ca3af;
+  border-color: #6b7280;
+  box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
 }
 
-.btn-submit-comment {
-  padding: 0.625rem 1.25rem;
-  background: #6b7280;
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-submit-rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
   color: white;
   border: none;
-  border-radius: 0.375rem;
-  font-weight: 500;
+  border-radius: 0.5rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s;
   font-size: 0.875rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-submit-comment:hover:not(:disabled) {
-  background: #4b5563;
+.btn-submit-rating:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.btn-submit-comment:disabled {
+.btn-submit-rating:disabled {
   background: #d1d5db;
   cursor: not-allowed;
+  transform: none;
 }
 
+.helper-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  margin: 0;
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.prompt-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #9ca3af;
+}
+
+.login-prompt p {
+  color: #6b7280;
+  margin: 0;
+}
+
+.login-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+/* Comments Header */
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.comments-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.comments-filter {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.filter-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.filter-btn.active {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+/* Comments List */
 .comments-list {
   display: flex;
   flex-direction: column;
@@ -1853,6 +2266,16 @@ onMounted(() => {
 .comment-item {
   display: flex;
   gap: 1rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s;
+}
+
+.comment-item:hover {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .comment-avatar-wrapper {
@@ -1863,12 +2286,12 @@ onMounted(() => {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 50%;
-  background: #e5e7eb;
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  color: #6b7280;
+  color: white;
   font-size: 1rem;
 }
 
@@ -1896,7 +2319,7 @@ onMounted(() => {
 }
 
 .comment-rating {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .comment-text {
@@ -1904,6 +2327,29 @@ onMounted(() => {
   line-height: 1.6;
   margin: 0;
   font-size: 0.875rem;
+}
+
+.comment-text-empty {
+  color: #9ca3af;
+  font-style: italic;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.no-comments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.no-comments-icon {
+  width: 3rem;
+  height: 3rem;
 }
 
 /* Sidebar */
@@ -1999,6 +2445,63 @@ onMounted(() => {
   color: #111827;
 }
 
+.visibility-text {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.visibility-text.private {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.visibility-text.public {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.access-card {
+  background: linear-gradient(135deg, #fef9e7 0%, #ffffff 100%);
+}
+
+.access-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.access-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.access-group-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #78350f;
+}
+
+.access-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.access-item {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: white;
+  border: 1px solid #fbbf24;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  color: #92400e;
+  font-weight: 500;
+}
+
 /* Error State */
 .error-container {
   max-width: 1400px;
@@ -2036,6 +2539,10 @@ onMounted(() => {
 
   .sidebar {
     order: 2;
+  }
+
+  .article-stats-enhanced {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -2076,6 +2583,15 @@ onMounted(() => {
   .article-content :deep(.code-copy-btn span) {
     display: none;
   }
+
+  .comments-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .rating-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Print */
@@ -2083,12 +2599,12 @@ onMounted(() => {
   .main-header,
   .breadcrumb-container,
   .action-buttons,
-  .rating-section,
-  .comments-section,
+  .rating-comment-section,
   .sidebar,
   .gallery-modal,
   .article-content :deep(.code-copy-btn),
-  .article-content :deep(pre[data-language]::before) {
+  .article-content :deep(pre[data-language]::before),
+  .rating-history-panel {
     display: none !important;
   }
 
