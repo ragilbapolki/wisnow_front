@@ -106,7 +106,7 @@ export function linkTemporaryImagesToArticle (articleId, sessionKey) {
 
 export function cleanupTemporaryImages (sessionKey) {
   return request({
-    url: '/admin/articles/gallery/cleanup-temporary',
+    url: '/editor/articles/gallery/cleanup-temporary',
     method: 'post',
     data: {
       session_key: sessionKey
@@ -240,5 +240,24 @@ export function getEditoArticles(id) {
   return request({
     url: `/articles/${id}`,
     method: 'get'
+  })
+}
+
+export function updateEditorArticle(id, data) {
+  return request({
+    url: `/editor/articles/${id}`,
+    method: 'post',
+    data,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+export function bulkDeleteArticleImages(ids) {
+  return request({
+    url: '/articles/images/bulk-delete',
+    method: 'post',
+    data: { ids }
   })
 }

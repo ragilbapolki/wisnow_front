@@ -109,9 +109,19 @@
 
         <el-table-column label="Role" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.role === 'admin' ? 'danger' : 'primary'" size="small">
-              {{ row.role.toUpperCase() }}
-            </el-tag>
+            <el-tag :type="
+              row.role === 'admin'
+                ? 'danger'
+                : row.role === 'editor'
+                ? 'warning'
+                : row.role === 'user'
+                ? 'success'
+                : 'info'
+            "
+            size="small"
+          >
+            {{ row.role.toUpperCase() }}
+          </el-tag>
           </template>
         </el-table-column>
 

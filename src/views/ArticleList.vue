@@ -15,9 +15,9 @@
         </div>
 
 
-        <nav class="header-nav">
+        <!-- <nav class="header-nav">
           <router-link to="/" class="nav-link">Home</router-link>
-        </nav>
+        </nav> -->
 
         <div class="header-actions">
           <div v-if="isAuthenticated" class="user-menu">

@@ -1,6 +1,9 @@
 import 'normalize.css/normalize.css' // CSS resets
 import '@/styles/main.scss' // global css
 // import 'element-plus/theme-chalk/dark/css-vars.css'
+import ElementPlus from 'element-plus'
+
+import 'element-plus/dist/index.css'
 
 import {
   createApp
@@ -46,6 +49,7 @@ enableMocking().then(async () => {
 
   const app = createApp(App)
   app.use(router) // It must be after the enablemock function
+  app.use(ElementPlus)
 
   app.provide('context', ctx)
   app.component('svg-icon', SvgIcon)

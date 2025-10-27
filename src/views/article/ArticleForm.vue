@@ -1,4 +1,4 @@
-<!-- ArtikelForm.vue - Complete with Table Support -->
+<!-- ArtikelForm.vue - TinyMCE Editor with Table Support -->
 <template>
   <div class="app-container">
     <!-- Header -->
@@ -56,16 +56,12 @@
               />
             </el-form-item>
 
-            <el-form-item label="Content" prop="content">
-              <div class="editor-container">
-                <quill-editor
-                  ref="quillEditorRef"
-                  v-model:content="article.content"
-                  contentType="html"
-                  style="height: 400px"
-                  :options="editorOptions"
-                />
-              </div>
+            <el-form-item label="Content" prop="content" class="content-editor-item">
+              <Editor
+                v-model="article.content"
+                api-key="q9gbl7y13jri6um8nbtsv7by5f1hfso5j7gfn39hskptlq3c"
+                :init=editorConfig
+              />
             </el-form-item>
 
             <el-form-item label="Images">
@@ -79,7 +75,7 @@
                   :on-remove="handleRemove"
                   :on-preview="handlePreview"
                   :before-upload="beforeUpload"
-                  :limit="25"
+                  :limit="80"
                   :on-exceed="handleExceed"
                   list-type="picture-card"
                   multiple
@@ -93,7 +89,7 @@
                 <div class="upload-tips">
                   <el-text size="small" type="info">
                     <el-icon><InfoFilled /></el-icon>
-                    Support JPG, PNG, GIF formats. Max 5MB per image. Maximum 25 images.
+                    Support JPG, PNG, GIF formats. Max 5MB per image. Maximum 80 images.
                   </el-text>
                 </div>
 
@@ -380,59 +376,13 @@
         fit="contain"
       />
     </el-dialog>
-
-    <!-- Table Insert Dialog -->
-    <el-dialog
-      v-model="tableDialogVisible"
-      title="Insert Table"
-      width="400px"
-      center
-    >
-      <el-form label-width="100px" label-position="left">
-        <el-form-item label="Rows">
-          <el-input-number
-            v-model="tableRows"
-            :min="1"
-            :max="20"
-            size="large"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="Columns">
-          <el-input-number
-            v-model="tableColumns"
-            :min="1"
-            :max="10"
-            size="large"
-            style="width: 100%"
-          />
-        </el-form-item>
-
-        <el-alert
-          title="Preview"
-          type="info"
-          :closable="false"
-          style="margin-top: 16px;"
-        >
-          Table will be created with {{ tableRows }} rows × {{ tableColumns }} columns
-        </el-alert>
-      </el-form>
-
-      <template #footer>
-        <el-button @click="tableDialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="confirmInsertTable">
-          <el-icon><Check /></el-icon>
-          Insert Table
-        </el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref, computed, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter, onBeforeRouteLeave } from 'vue-router'
-import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import { ElMessage, ElNotification } from 'element-plus'
 import {
   ArrowLeft,
   Document,
@@ -450,7 +400,7 @@ import {
 import {
   getEditoArticles,
   createEditorArticle,
-  updateAdminArticle,
+  updateEditorArticle,
   uploadArticleImage,
   deleteArticleImage,
   linkTemporaryImagesToArticle,
@@ -459,8 +409,7 @@ import {
 } from '@/api/article'
 import { getCategories } from '@/api/article'
 import { getDivisions } from '@/api/division'
-import { QuillEditor } from '@vueup/vue-quill'
-import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import Editor from '@tinymce/tinymce-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -471,7 +420,6 @@ const attachmentFile = ref(null)
 // State
 const formRef = ref()
 const uploadRef = ref()
-const quillEditorRef = ref()
 const formLoading = ref(false)
 const submitLoading = ref(false)
 const categories = ref([])
@@ -482,82 +430,34 @@ const uploadedImages = ref([])
 const previewDialogVisible = ref(false)
 const previewImageUrl = ref('')
 
-// Table Dialog State
-const tableDialogVisible = ref(false)
-const tableRows = ref(3)
-const tableColumns = ref(3)
-
-// Function to insert table
-const insertTable = () => {
-  tableDialogVisible.value = true
-}
-
-const confirmInsertTable = () => {
-  const quill = quillEditorRef.value?.getQuill()
-  if (quill) {
-    const range = quill.getSelection(true)
-    if (range) {
-      // Generate table HTML
-      let tableHTML = '<table style="border-collapse: collapse; width: 100%; margin: 20px 0;">'
-
-      // Generate rows
-      for (let i = 0; i < tableRows.value; i++) {
-        tableHTML += '<tr>'
-        for (let j = 0; j < tableColumns.value; j++) {
-          const tag = i === 0 ? 'th' : 'td'
-          const style = 'border: 1px solid #dcdfe6; padding: 8px 12px;'
-          const headerStyle = i === 0 ? ' background-color: #f5f7fa; font-weight: 600;' : ''
-          tableHTML += `<${tag} style="${style}${headerStyle}">${tag === 'th' ? 'Header ' + (j + 1) : ''}</${tag}>`
-        }
-        tableHTML += '</tr>'
-      }
-      tableHTML += '</table><p><br></p>'
-
-      // Insert table
-      const delta = quill.clipboard.convert(tableHTML)
-      quill.updateContents(delta, 'user')
-      quill.setSelection(range.index + 1, 'user')
-
-      ElNotification({
-        title: 'Success',
-        message: 'Table inserted successfully',
-        type: 'success',
-        duration: 2000
-      })
-    }
-
-    tableDialogVisible.value = false
-  }
-}
-
-// Editor Options
-const editorOptions = ref({
-  theme: 'snow',
-  modules: {
-    toolbar: {
-      container: [
-        ['bold', 'italic', 'underline', 'strike'],
-        ['blockquote', 'code-block'],
-        [{ 'header': 1 }, { 'header': 2 }],
-        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-        [{ 'script': 'sub'}, { 'script': 'super' }],
-        [{ 'indent': '-1'}, { 'indent': '+1' }],
-        [{ 'direction': 'rtl' }],
-        [{ 'size': ['small', false, 'large', 'huge'] }],
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-        [{ 'color': [] }, { 'background': [] }],
-        [{ 'font': [] }],
-        [{ 'align': [] }],
-        ['clean'],
-        ['link', 'image', 'video'],
-        ['table'] // Table button
-      ],
-      handlers: {
-        table: insertTable
-      }
-    }
+// TinyMCE Configuration
+const editorConfig = ref({
+  height: 500,
+  menubar: true,
+  width: '100%',
+  plugins: [
+    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+    'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+  ],
+  toolbar: 'undo redo | blocks | ' +
+    'bold italic forecolor | alignleft aligncenter ' +
+    'alignright alignjustify | bullist numlist outdent indent | ' +
+    'table | removeformat | help',
+  content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+  table_toolbar: 'tableprops tabledelete | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol',
+  table_appearance_options: true,
+  table_grid: true,
+  table_resize_bars: true,
+  table_default_attributes: {
+    border: '1'
   },
-  placeholder: 'Write your article content here...'
+  table_default_styles: {
+    'border-collapse': 'collapse',
+    width: '100%'
+  },
+  branding: false,
+  promotion: false
 })
 
 // Computed
@@ -934,7 +834,7 @@ const handlePreview = (file) => {
 }
 
 const handleExceed = (files, fileList) => {
-  ElMessage.warning(`Maximum 25 images allowed. You selected ${files.length} files, current total: ${fileList.length}`)
+  ElMessage.warning(`Maximum 80 images allowed. You selected ${files.length} files, current total: ${fileList.length}`)
 }
 
 const temporaryImages = ref([])
@@ -957,7 +857,6 @@ const fetchDivisionsAndDepartments = async () => {
     if (response.success !== false) {
       const allData = response.data || response || []
 
-      // Pisahkan berdasarkan type
       divisions.value = allData.filter(item => item.type === 'division')
       departments.value = allData.filter(item => item.type === 'department')
     }
@@ -985,9 +884,9 @@ const fetchArticle = async () => {
         type: data.type || '',
         category_id: data.category_id,
         status: data.status || 'draft',
-        visibility: data.visibility || 'public', // NEW
-        divisions: data.divisions?.map(d => d.id) || [], // NEW
-        departments: data.departments?.map(d => d.id) || [], // NEW
+        visibility: data.visibility || 'public',
+        divisions: data.divisions?.map(d => d.id) || [],
+        departments: data.departments?.map(d => d.id) || [],
         document_type: data.document_type || '',
         gallery_count: data.gallery_count || 0,
         created_at: data.created_at,
@@ -1041,7 +940,6 @@ const handleSubmit = async (publishAfterSave = false) => {
       formData.append('status', publishAfterSave ? 'published' : article.status)
       formData.append('visibility', article.visibility)
 
-      // Add divisions and departments for private articles
       if (article.visibility === 'private') {
         article.divisions.forEach(divisionId => {
           formData.append('divisions[]', divisionId)
@@ -1065,7 +963,7 @@ const handleSubmit = async (publishAfterSave = false) => {
 
       formData.append('_method', 'PUT')
 
-      response = await updateAdminArticle(article.id, formData)
+      response = await updateEditorArticle(article.id, formData)
 
     } else {
       const formData = new FormData()
@@ -1077,7 +975,6 @@ const handleSubmit = async (publishAfterSave = false) => {
       formData.append('status', publishAfterSave ? 'published' : article.status)
       formData.append('visibility', article.visibility)
 
-      // Add divisions and departments for private articles
       if (article.visibility === 'private') {
         article.divisions.forEach(divisionId => {
           formData.append('divisions[]', divisionId)
@@ -1101,7 +998,6 @@ const handleSubmit = async (publishAfterSave = false) => {
         const newArticleId = response.id || response.data.id
         await linkTemporaryImagesToArticleFixed(newArticleId)
       }
-      console.info(response)
     }
 
     if (response.success !== false) {
@@ -1250,7 +1146,7 @@ const handleSubmitAndPublish = async () => {
 
 onMounted(async () => {
   await fetchCategories()
-  await fetchDivisionsAndDepartments ()
+  await fetchDivisionsAndDepartments()
   if (isEdit.value) {
     await fetchArticle()
   }
@@ -1606,5 +1502,23 @@ onMounted(async () => {
 
 :deep(.qlbt-col-tool-cell-holder:hover) {
   background-color: #409eff;
+}
+
+.content-editor-item {
+  width: 100%;
+}
+
+.content-editor {
+  width: 100%;
+}
+
+.content-editor :deep(.tox-tinymce) {
+  width: 100% !important;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.el-form-item__content {
+  width: 100%;
 }
 </style>

@@ -327,7 +327,7 @@
         </div>
 
         <!-- Lihat Semua Articles Button -->
-        <div class="view-all-container">
+        <!-- <div class="view-all-container">
           <router-link to="/articlesList" class="view-all-button">
             Lihat Semua Artikel
             <svg class="view-all-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -339,7 +339,7 @@
               ></path>
             </svg>
           </router-link>
-        </div>
+        </div> -->
       </div>
     </section>
 
