@@ -1,35 +1,8 @@
- q<!-- ArticleList.vue -->
+<!-- ArticleList.vue - UPDATED -->
 <template>
   <div class="article-list-page">
-    <!-- Header Section -->
-    <header class="page-header">
-      <div class="header-container">
-        <div class="header-logo">
-          <router-link to="/" class="logo-link">
-            <img src="@/assets/images/logo_kb_no_text.png" alt="Wismilak Logo" class="company-logo" />
-            <div class="company-text">
-              <span class="company-name-header">WISMILAK</span>
-              <span class="company-subtitle">Knowledge Base</span>
-            </div>
-          </router-link>
-        </div>
-
-
-        <!-- <nav class="header-nav">
-          <router-link to="/" class="nav-link">Home</router-link>
-        </nav> -->
-
-        <div class="header-actions">
-          <div v-if="isAuthenticated" class="user-menu">
-            <div class="user-info">
-              <img :src="user.avatar_url || '/default-avatar.png'" :alt="user.name" class="user-avatar" />
-              <span class="user-name">{{ user.name }}</span>
-            </div>
-          </div>
-          <router-link v-else to="/login" class="login-button">Login</router-link>
-        </div>
-      </div>
-    </header>
+    <!-- ✅ Gunakan komponen PublicHeader -->
+    <PublicHeader />
 
     <!-- Page Content -->
     <div class="page-content">
@@ -75,10 +48,9 @@
               </el-select>
             </div>
 
-            <!-- Type Filter -->
             <div class="filter-group">
               <label class="filter-label">Tipe</label>
-              <el-select v-model="filters.type" @change="applyFilters" >
+              <el-select v-model="filters.type" @change="applyFilters">
                 <el-option value="">Semua Tipe</el-option>
                 <el-option value="SOP">📋 SOP</el-option>
                 <el-option value="Kebijakan">⚖️ Kebijakan</el-option>
@@ -86,10 +58,9 @@
               </el-select>
             </div>
 
-            <!-- Sort Filter -->
             <div class="filter-group">
               <label class="filter-label">Urutkan</label>
-              <el-select v-model="filters.sort" @change="applyFilters" >
+              <el-select v-model="filters.sort" @change="applyFilters">
                 <el-option value="latest">🕒 Terbaru</el-option>
                 <el-option value="popular">🔥 Terpopuler</el-option>
                 <el-option value="rating">⭐ Rating Tertinggi</el-option>
@@ -101,13 +72,12 @@
               <label class="filter-label">Penulis</label>
               <el-select v-model="filters.penulis" @change="applyFilters">
                 <el-option value="">Semua Penulis</el-option>
-                <el-option v-for="pen in penulis" :key="pen.id" :value="pen.id" :label="pen.name" >
+                <el-option v-for="pen in penulis" :key="pen.id" :value="pen.id" :label="pen.name">
                   {{ pen.name }} ({{ pen.articles_count }})
                 </el-option>
               </el-select>
             </div>
 
-            <!-- Reset Button -->
             <el-button @click="resetFilters" class="reset-button" type="info">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -166,23 +136,35 @@
         <!-- Articles Grid -->
         <div v-else class="articles-grid">
           <div v-for="article in articles" :key="article.id" class="article-card">
-            <!-- Article Type Badge -->
             <div class="article-header">
-              <span :class="getArticleTypeClass(article.type)" class="article-badge">
-                {{ article.type }}
-              </span>
-              <div class="article-views">👁️ {{ formatNumber(article.view_count) }}</div>
+              <div class="article-tags">
+                <el-tag :type="getTagType(article.type)" size="small" effect="dark">
+                  {{ article.type }}
+                </el-tag>
+                <el-tag
+                  v-if="article.visibility === 'private'"
+                  type="warning"
+                  size="small"
+                >
+                  🔒 Private
+                </el-tag>
+                <el-tag v-else type="success" size="small">
+                  🌐 Public
+                </el-tag>
+              </div>
+              <div class="article-views">
+                👁️ {{ formatNumber(article.view_count) }}
+              </div>
             </div>
 
             <router-link
-                :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
-                class="read-more-btn"
-              >
+              :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
+              class="read-more-btn"
+            >
               <h3 class="article-title">{{ article.title }}</h3>
             </router-link>
             <p class="article-description">{{ article.description }}</p>
 
-            <!-- Category Tag -->
             <div class="article-meta">
               <span class="category-tag">
                 📁 {{ article.category?.name || 'Umum' }}
@@ -192,7 +174,6 @@
               </span>
             </div>
 
-            <!-- Author & Rating -->
             <div class="article-footer">
               <div class="article-author">
                 <img
@@ -211,7 +192,6 @@
               </div>
             </div>
 
-            <!-- Read More Button -->
             <div class="article-actions">
               <router-link
                 :to="{ name: 'ArticleDetail', params: { slug: article.slug } }"
@@ -274,15 +254,11 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getArticles, getCategories } from '@/api/article'
 import { getPenulis } from '@/api/user'
-import { dispatch, ctx } from '@/store'
 import { ElMessage } from 'element-plus'
+import PublicHeader from '@/views/public/components/PublicHeader.vue'
 
 const router = useRouter()
 const route = useRoute()
-
-// Auth State
-const isAuthenticated = computed(() => !!dispatch.user.getToken())
-const user = computed(() => ctx.userInfo || {})
 
 // Articles State
 const articles = ref([])
@@ -294,7 +270,6 @@ const perPage = ref(12)
 
 // Categories State
 const categories = ref([])
-// Categories penulis
 const penulis = ref([])
 
 // Filters State
@@ -345,7 +320,7 @@ const loadArticles = async () => {
     if (filters.search) params.search = filters.search
     if (filters.category) params.category = filters.category
     if (filters.type) params.type = filters.type
-    if (filters.penulis) params.penulis = filters.penulis // ✅ tambahkan ini
+    if (filters.penulis) params.penulis = filters.penulis
 
     const response = await getArticles(params)
 
@@ -399,7 +374,6 @@ const loadPenulis = async () => {
     console.error('Error loading penulis:', error)
   }
 }
-
 
 const applyFilters = () => {
   currentPage.value = 1
@@ -487,15 +461,15 @@ const formatDate = (dateString) => {
   return `${Math.floor(diffDays / 365)} tahun lalu`
 }
 
-const getArticleTypeClass = (type) => {
+const getTagType = (type) => {
   const typeMap = {
-    'SOP': 'badge-red',
-    'Panduan': 'badge-green',
-    'Tutorial': 'badge-blue',
-    'Kebijakan': 'badge-purple',
-    'Artikel': 'badge-gray'
+    'SOP': 'danger',
+    'Panduan': 'success',
+    'Tutorial': 'primary',
+    'Kebijakan': 'warning',
+    'Artikel': 'info'
   }
-  return typeMap[type] || 'badge-gray'
+  return typeMap[type] || 'info'
 }
 
 // Lifecycle
@@ -522,96 +496,6 @@ watch(() => route.query, (newQuery) => {
 .article-list-page {
   min-height: 100vh;
   background: #f9fafb;
-}
-
-/* Header Styles */
-.page-header {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-.header-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-
-.company-name-header {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #16a34a;
-  letter-spacing: 0.05em;
-}
-
-.company-subtitle {
-  font-size: 0.75rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.header-nav {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.nav-link {
-  color: #374151;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: color 0.2s ease;
-}
-
-.nav-link:hover,
-.nav-link.router-link-active {
-  color: #16a34a;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.user-avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.login-button {
-  padding: 0.5rem 1.5rem;
-  background: #16a34a;
-  color: white;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.login-button:hover {
-  background: #15803d;
 }
 
 /* Page Content */
@@ -879,20 +763,15 @@ watch(() => route.query, (newQuery) => {
   margin-bottom: 1rem;
 }
 
-.article-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.article-tags {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
 }
 
-.badge-red { background: #fee2e2; color: #dc2626; }
-.badge-green { background: #dcfce7; color: #16a34a; }
-.badge-purple { background: #f3e8ff; color: #9333ea; }
-.badge-blue { background: #dbeafe; color: #2563eb; }
-.badge-gray { background: #f3f4f6; color: #6b7280; }
-
 .article-views {
+  white-space: nowrap;
+  flex-shrink: 0;
   font-size: 0.875rem;
   color: #6b7280;
 }
@@ -1070,17 +949,6 @@ watch(() => route.query, (newQuery) => {
 }
 
 @media (max-width: 768px) {
-  .header-container {
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .header-nav {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-  }
-
   .page-title {
     font-size: 2rem;
   }
@@ -1133,36 +1001,6 @@ watch(() => route.query, (newQuery) => {
   .pagination-button span {
     display: none;
   }
-}
-.header-logo .logo-link {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem; /* jarak antara logo dan teks */
-  text-decoration: none;
-}
-
-.company-logo {
-  width: 45px;
-  height: 45px;
-  object-fit: contain;
-}
-
-.company-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  line-height: 1.1;
-}
-
-.company-name-header {
-  font-weight: 700;
-  color: #008000; /* hijau khas Wismilak */
-  font-size: 1.1rem;
-}
-
-.company-subtitle {
-  font-size: 0.8rem;
-  color: #555;
 }
 
 </style>

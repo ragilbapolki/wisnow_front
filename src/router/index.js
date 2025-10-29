@@ -3,23 +3,26 @@ import {
   createRouter,
   createWebHistory
 } from 'vue-router'
-import { ElMessage } from 'element-plus'
 
-import nestedRouter from './modules/nested'
-import Home from '@/views/Home.vue'
-import ArticleDetail from '@/views/ArticleDetail.vue'
-import ArticleList from '@/views/ArticleList.vue'
+import PublicHome from '@/views/public/home.vue'
+import PublicArticleDetail from '@/views/public/ArticleDetail.vue'
+import PublicAuthorProfile from '@/views/public/AuthorProfile.vue'
+import PublicArticleList from '@/views/public/ArticleList.vue'
+import AdminCategories from '@/views/admin/category/index.vue'
+import AdminDivision from '@/views/admin/division/DivisionManagement.vue'
+import AdminProfile from '@/views/admin/profile/MyProfile.vue'
+import AdminUser from '@/views/admin/user/UserList.vue'
+import AdminArticleList from '@/views/admin/article/ArticleList.vue'
+import AdminArticleForm from '@/views/admin/article/ArticleForm.vue'
+import AdminArticleView from '@/views/admin/article/ArticleView.vue'
+import AdminArticleGalery from '@/views/admin/article/ArticleGallery.vue'
 
 import Layout from '@/layout/index.vue'
 import {
   DataAnalysis,
   DocumentCopy,
   Grid,
-  HelpFilled,
-  Menu,
-  Odometer,
   OfficeBuilding,
-  Picture,
   User
 } from '@element-plus/icons-vue'
 
@@ -35,7 +38,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'Home',
-      component: Home,
+      component: PublicHome,
       hidden: true,
       meta: {
         title: 'Home',
@@ -45,12 +48,18 @@ const router = createRouter({
     {
       path: '/articlesList',
       name: 'PublicArticleList',
-      component: ArticleList
+      component: PublicArticleList
     },
     {
       path: '/articles/:slug',
       name: 'ArticleDetail',
-      component: ArticleDetail,
+      component: PublicArticleDetail,
+      props: true
+    },
+    {
+      path: '/author/:id',
+      name: 'AuthorProfile',
+      component: PublicAuthorProfile,
       props: true
     },
     {
@@ -63,109 +72,13 @@ const router = createRouter({
       children: [{
         path: 'dashboard',
         name: 'Dashboard',
-        component: () => import('@/views/dashboard.vue'),
+        component: () => import('@/views/admin/dashboard.vue'),
         meta: {
           title: 'Dashboard',
           icon: DataAnalysis,
           keepAlive: true,
           affix: true,
           requiresAuth: true,
-        }
-      }]
-    },
-    {
-      path: '/about',
-      component: Layout,
-      redirect: '/about/readme',
-      hidden: true,
-      meta: {
-        alwaysShow: true,
-        title: 'About',
-        icon: HelpFilled
-      },
-      children: [{
-        path: 'readme',
-        name: 'Readme',
-        component: () => import('@/views/about/readme.vue'),
-        meta: {
-          title: 'Readme',
-        }
-      }, {
-        path: 'changelog',
-        name: 'Changelog',
-        component: () => import('@/views/about/changelog.vue'),
-        meta: {
-          title: 'Changelog',
-        }
-      }]
-    },
-    {
-      path: '/example',
-      component: Layout,
-      hidden: true,
-      redirect: '/example/icon',
-      meta: {
-        alwaysShow: true,
-        title: 'Example',
-        icon: Menu,
-      },
-      children: [{
-          path: 'icon',
-          name: 'Icons',
-          component: () => import('@/views/example/icon.vue'),
-          meta: {
-            title: 'Icons',
-            icon: 'icon',
-          }
-        },
-        {
-          path: 'table',
-          name: 'Table',
-          component: () => import('@/views/example/table.vue'),
-          meta: {
-            title: 'Table',
-            icon: 'table',
-          }
-        },
-        {
-          path: 'tree',
-          name: 'Tree',
-          meta: {
-            title: 'Tree',
-            icon: 'tree'
-          },
-          component: () => import('@/views/example/tree.vue'),
-        },
-        {
-          path: 'form',
-          name: 'Form',
-          meta: {
-            title: 'Form',
-            icon: 'form'
-          },
-          component: () => import('@/views/example/form.vue'),
-        },
-        {
-          path: 'test',
-          name: 'Test',
-          component: () => import('@/views/example/test.vue'),
-          meta: {
-            title: 'Test',
-            icon: Odometer,
-            keepAlive: true,
-          }
-        },
-      ]
-    },
-    {
-      path: '/external-link',
-      hidden: true,
-      component: Layout,
-      children: [{
-        path: 'https://github.com/chocho-1115/vue-admin',
-        meta: {
-          title: 'External Link',
-          icon: 'link'
         }
       }]
     },
@@ -183,7 +96,7 @@ const router = createRouter({
         {
           path: 'list',
           name: 'CategoryList',
-          component: () => import('@/views/category/index.vue'),
+          component: AdminCategories,
           meta: {
             title: 'Kategori',
             icon: Grid,
@@ -202,14 +115,14 @@ const router = createRouter({
       redirect: '/admin/divisi/list',
       meta: {
         title: 'Division',
-        icon: OfficeBuilding, // ✅ Gunakan icon yang sudah di-import
+        icon: OfficeBuilding,
         requiresAuth: true,
       },
       children: [
         {
           path: 'list',
           name: 'DivisionList',
-          component: () => import('@/views/division/DivisionManagement.vue'),
+          component: AdminDivision,
           meta: {
             title: 'Divisi / Departemen',
             icon: OfficeBuilding,
@@ -235,7 +148,7 @@ const router = createRouter({
         {
           path: 'me',
           name: 'MyProfile',
-          component: () => import('@/views/Profile/MyProfile.vue'),
+          component: AdminProfile,
           meta: {
             title: 'My Profile',
             requiresAuth: true
@@ -257,7 +170,7 @@ const router = createRouter({
         {
           path: 'list',
           name: 'UserList',
-          component: () => import('@/views/user/userList.vue'),
+          component: AdminUser,
           meta: {
             title: 'Users',
             icon: User,
@@ -284,7 +197,7 @@ const router = createRouter({
         {
           path: 'list',
           name: 'AdminArticleList',
-          component: () => import('@/views/article/ArticleList.vue'),
+          component: AdminArticleList,
           meta: {
             title: 'Article List',
             icon: DocumentCopy,
@@ -298,7 +211,7 @@ const router = createRouter({
         {
           path: 'create',
           name: 'ArticleCreate',
-          component: () => import('@/views/article/ArticleForm.vue'),
+          component: AdminArticleForm,
           hidden: true,
           meta: {
             title: 'Create Article',
@@ -312,7 +225,7 @@ const router = createRouter({
         {
           path: 'edit/:id',
           name: 'ArticleEdit',
-          component: () => import('@/views/article/ArticleForm.vue'),
+          component: AdminArticleForm,
           hidden: true,
           meta: {
             title: 'Edit Article',
@@ -326,7 +239,7 @@ const router = createRouter({
         {
           path: 'view/:id',
           name: 'ArticleView',
-          component: () => import('@/views/article/ArticleView.vue'),
+          component: AdminArticleView,
           hidden: true,
           meta: {
             title: 'View Article',
@@ -340,7 +253,7 @@ const router = createRouter({
         {
           path: ':id/gallery',
           name: 'ArticleGallery',
-          component: () => import('@/views/article/ArticleGallery.vue'),
+          component: AdminArticleGalery,
           hidden: true,
           meta: {
             title: 'Article Gallery',

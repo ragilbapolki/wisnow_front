@@ -77,7 +77,7 @@ const toggleSidebar = () => {
 const onLogout = async () => {
   logout().then(() => {
     dispatch.user.removeInfo()
-    router.push(`/account/login?redirect=${redirect}`)
+    router.push(`/?redirect=${redirect}`)
   })
 }
 </script>

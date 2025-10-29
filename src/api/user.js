@@ -99,3 +99,17 @@ export function getPenulis() {
     method: 'get'
   })
 }
+
+export function getPenulisShow(id) {
+  return request({
+    url: `/users/${id}`,
+    method: 'get'
+  })
+}
+
+export function getArtikelPenulisShow(id) {
+  return request({
+    url: `/users/${id}/articles`,
+    method: 'get'
+  })
+}

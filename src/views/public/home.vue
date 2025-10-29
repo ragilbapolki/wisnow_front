@@ -2,180 +2,12 @@
 <template>
   <div class="home-page">
     <!-- Header Section -->
-    <header class="main-header">
-      <div class="header-container">
-        <div class="header-logo">
-          <div class="logo-text">
-            <span class="company-name-header">WISMILAK</span>
-            <span class="company-subtitle">Knowledge Base</span>
-          </div>
-        </div>
+    <PublicHeader />
 
-        <!-- Navigation -->
-        <!-- <nav class="header-nav">
-          <div class="nav-links">
-            <router-link to="/" class="nav-link">Home</router-link>
-            <router-link to="/articlesList" class="nav-link">Artikel</router-link>
-            <a href="#categories" class="nav-link" @click.prevent="scrollToCategories">Kategori</a>
-          </div>
-        </nav> -->
+    <!-- Login Modal Component -->
+    <Login v-model="showLoginModal" />
 
-        <!-- Search Bar -->
-        <!-- <div class="header-search">
-          <div class="search-input-container">
-            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              ></path>
-            </svg>
-            <input
-              type="text"
-              placeholder="Cari artikel, SOP, panduan..."
-              class="search-input"
-              v-model="searchQuery"
-              @keyup.enter="handleSearch"
-            />
-          </div>
-        </div> -->
-
-        <!-- Login/User Section -->
-        <div class="header-actions">
-          <div v-if="isAuthenticated" class="user-menu">
-            <el-dropdown trigger="click" @command="handleCommand">
-              <div class="el-dropdown-link user-info">
-                <img
-                  :src="user.avatar_url || '/default-avatar.png'"
-                  :alt="user.name"
-                  class="user-avatar"
-                />
-                <span class="user-name">{{ user.name }}</span>
-                <el-icon class="el-icon--right">
-                  <arrow-down />
-                </el-icon>
-              </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <router-link to="/profile">
-                    <el-dropdown-item>
-                      <el-icon class="mr-1"><i-ep-User /></el-icon>
-                      My Profile
-                    </el-dropdown-item>
-                  </router-link>
-                  <el-dropdown-item command="profile">
-                    <router-link to="/admin/dashboard">
-                      🏛️ Admin Dashboard
-                    </router-link>
-                  </el-dropdown-item>
-                  <el-dropdown-item @click.native="onLogout" divided>🚪 Logout</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </div>
-
-          <button v-else @click="openLoginModal" class="login-button">
-            Login
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- Login Modal -->
-    <div v-if="showLoginModal" class="modal-overlay" @click="closeLoginModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3 class="modal-title">Login ke WISMILAK Knowledge Base</h3>
-          <button @click="closeLoginModal" class="modal-close">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
-        </div>
-
-        <div class="modal-body">
-          <form @submit.prevent="handleLogin" class="login-form">
-            <el-form
-              :model="loginForm"
-              :rules="loginRules"
-              autocomplete="on"
-              class="login-form"
-              label-position="left"
-              ref="formDom"
-            >
-              <label for="email" class="form-label">Email</label>
-              <el-form-item prop="email">
-                <el-input
-                  size="large"
-                  autocomplete="on"
-                  name="email"
-                  placeholder="Username"
-                  ref="email"
-                  tabindex="1"
-                  type="text"
-                  v-model="loginForm.email"
-                >
-                  <template #prefix>
-                    <svg-icon icon="user" />
-                  </template>
-                </el-input>
-              </el-form-item>
-
-              <label for="password" class="form-label">Password</label>
-              <el-form-item prop="password">
-                <el-input
-                  size="large"
-                  :type="passwordType"
-                  @keyup.enter="handleLogin"
-                  autocomplete="on"
-                  name="password"
-                  placeholder="Password"
-                  ref="passwordDom"
-                  tabindex="2"
-                  v-model="loginForm.password"
-                >
-                  <template #prefix>
-                    <svg-icon icon="password" />
-                  </template>
-                  <template #suffix>
-                    <span @click="showPwd">
-                      <svg-icon :icon="passwordType === 'password' ? 'eye' : 'eye-open'" />
-                    </span>
-                  </template>
-                </el-input>
-              </el-form-item>
-            </el-form>
-            <div class="form-group">
-              <label class="checkbox-container">
-                <input type="checkbox" v-model="loginForm.remember" />
-                <span class="checkmark"></span>
-                Ingat saya
-              </label>
-            </div>
-
-            <button type="submit" class="submit-button" :disabled="loginLoading">
-              <span v-if="loginLoading" class="loading-spinner"></span>
-              {{ loginLoading ? 'Memproses...' : 'Login' }}
-            </button>
-          </form>
-
-          <div class="modal-footer">
-            <p class="footer-text">
-              Belum punya akun?
-              <a href="#" @click.prevent="showRegisterForm" class="footer-link">Daftar di sini</a>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hero Section - UPDATED -->
+    <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-overlay"></div>
       <div class="hero-content">
@@ -188,7 +20,7 @@
           </div>
         </div>
 
-        <!-- ✅ GANTI 3 CARDS DENGAN HERO SEARCH BAR -->
+        <!-- Hero Search Bar -->
         <div class="hero-search-container">
           <div class="hero-search-wrapper">
             <svg class="hero-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,6 +70,7 @@
       </div>
     </section>
 
+    <!-- Articles Section -->
     <section class="articles-section" id="articles">
       <div class="section-container">
         <div class="section-header">
@@ -325,21 +158,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Lihat Semua Articles Button -->
-        <!-- <div class="view-all-container">
-          <router-link to="/articlesList" class="view-all-button">
-            Lihat Semua Artikel
-            <svg class="view-all-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 8l4 4m0 0l-4 4m4-4H3"
-              ></path>
-            </svg>
-          </router-link>
-        </div> -->
       </div>
     </section>
 
@@ -398,28 +216,20 @@
 </template>
 
 <script setup>
-import { reactive, ref, nextTick, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { validUsername } from '@/utils/validate'
-import { login, logout } from '@/api/user'
 import { getArticles, getCategories } from '@/api/article'
+import { logout } from '@/api/user'
 import { dispatch, ctx } from '@/store'
 import { ElMessage } from 'element-plus'
+import PublicHeader from '@/views/public/components/PublicHeader.vue'
 
 const router = useRouter()
 const route = useRoute()
 
 // Auth State
-const loading = ref(false)
-const passwordType = ref('password')
 const showLoginModal = ref(false)
-const loginLoading = ref(false)
-
 const redirect = route.fullPath || '/'
-
-// User State
-const isAuthenticated = computed(() => !!dispatch.user.getToken())
-const user = computed(() => ctx.userInfo || {})
 
 // Search State
 const searchQuery = ref('')
@@ -435,131 +245,6 @@ const categoriesLoading = ref(false)
 const categoriesSlider = ref(null)
 const isAtStart = ref(true)
 const isAtEnd = ref(false)
-
-// Login Form
-const loginForm = reactive({
-  email: 'budi@example.com',
-  password: 'password123',
-  remember: false
-})
-
-// Validation Rules
-const validateEmail = (rule, value, callback) => {
-  const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!pattern.test(value)) {
-    callback(new Error('Please enter a valid email address'))
-  } else {
-    callback()
-  }
-}
-
-const validatePassword = (rule, value, callback) => {
-  if (value.length < 6) {
-    callback(new Error('The password can not be less than 6 digits'))
-  } else {
-    callback()
-  }
-}
-
-const loginRules = reactive({
-  email: [{ required: true, trigger: 'blur', validator: validateEmail }],
-  password: [{ required: true, trigger: 'blur', validator: validatePassword }],
-})
-
-const passwordDom = ref(null)
-const formDom = ref()
-
-// Auth Methods
-const showPwd = async () => {
-  if (passwordType.value === 'password') {
-    passwordType.value = ''
-  } else {
-    passwordType.value = 'password'
-  }
-  await nextTick()
-  passwordDom.value.focus()
-}
-
-const openLoginModal = () => {
-  showLoginModal.value = true
-}
-
-const closeLoginModal = () => {
-  showLoginModal.value = false
-}
-
-const handleLogin = () => {
-  formDom.value.validate((valid) => {
-    if (valid) {
-      loginLoading.value = true
-      login(loginForm)
-        .then((res) => {
-          console.log('✅ Login Response:', res.data)
-
-          const responseData = res.data?.data || res.data
-          const token = responseData.token
-          const userData = responseData.user
-
-          if (token) {
-            localStorage.setItem('token', token)
-            dispatch.user.setToken(token)
-            console.log('✅ Token saved')
-          }
-
-          if (userData) {
-            if (!userData.role) {
-              userData.role = 'user'
-            }
-
-            localStorage.setItem('user', JSON.stringify(userData))
-            console.log('💾 User saved:', userData)
-          }
-
-          const verifyToken = localStorage.getItem('token')
-          const verifyUser = localStorage.getItem('user')
-          console.log('Verify - Token:', verifyToken ? 'exists' : 'not found')
-          console.log('Verify - User:', verifyUser)
-
-          showLoginModal.value = false
-          loginLoading.value = false
-
-          ElMessage.success('Login berhasil!')
-
-          const userRole = userData?.role
-          const redirect = route.query.redirect
-
-          setTimeout(() => {
-            if (redirect && redirect !== '/') {
-              window.location.href = redirect
-            } else if (userRole === 'admin') {
-              window.location.href = '/admin/dashboard'
-            } else if (userRole === 'editor') {
-              window.location.href = '/admin/articles/list'
-            } else {
-              window.location.reload()
-            }
-          }, 200)
-        })
-        .catch((error) => {
-          console.error('❌ Login error:', error)
-          loginLoading.value = false
-          ElMessage.error(error.response?.data?.message || 'Login gagal')
-        })
-    } else {
-      console.log('error submit!!')
-      return false
-    }
-  })
-}
-
-const handleLogout = () => {
-  dispatch.user.removeToken()
-  router.push('/account/login')
-}
-
-const showRegisterForm = () => {
-  alert('Fitur registrasi akan segera hadir!')
-}
 
 // Navigation Methods
 const scrollToCategories = () => {
@@ -686,6 +371,7 @@ const loadCategories = async () => {
   }
 }
 
+// Helper Functions
 const formatRating = (rating) => {
   if (rating === null || rating === undefined || rating === '') {
     return '0.0';
@@ -754,499 +440,30 @@ onMounted(() => {
     slider.addEventListener('scroll', updateSliderButtons)
   }
 })
-
-const onLogout = async () => {
-  logout().then(() => {
-    dispatch.user.removeInfo()
-    router.push(`/account/login?redirect=${redirect}`)
-  })
-}
 </script>
 
-<style lang="scss">
-$bg: #283443;
-$light_gray: #fff;
-$cursor: #fff;
-
-@supports (-webkit-mask: none) and (not (cater-color: $cursor)) {
-  .login-container .el-input input {
-    color: $cursor;
-  }
-}
-
-.login-container {
-  .el-input {
-    .el-input__wrapper {
-      background: transparent;
-      box-shadow: none;
-    }
-    input {
-      -webkit-appearance: none;
-      color: $light_gray;
-      caret-color: $cursor;
-
-      &:-webkit-autofill {
-        box-shadow: 0 0 0px 1000px transparent inset !important;
-        -webkit-text-fill-color: $cursor !important;
-        transition: background-color 50000s ease-in-out 0s;
-      }
-    }
-  }
-
-  .el-form-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-  }
-}
-</style>
-
-<style lang="scss" scoped>
-$bg: #2d3a4b;
-$dark_gray: #889aa4;
-$light_gray: #eee;
-
-.login-container {
-  min-height: 100%;
-  width: 100%;
-  background-color: $bg;
-  overflow: hidden;
-
-  .login-form {
-    position: relative;
-    width: 520px;
-    max-width: 100%;
-    padding: 160px 35px 0;
-    margin: 0 auto;
-    overflow: hidden;
-  }
-
-  .tips {
-    font-size: 14px;
-    color: #fff;
-    margin-bottom: 10px;
-
-    span {
-      &:first-of-type {
-        margin-right: 16px;
-      }
-    }
-  }
-
-  .title-container {
-    position: relative;
-
-    .title {
-      font-size: 26px;
-      color: $light_gray;
-      margin: 0px auto 40px auto;
-      text-align: center;
-      font-weight: bold;
-    }
-  }
-}
-</style>
-
 <style scoped>
+/* ===========================
+   GLOBAL & RESET
+   =========================== */
 .home-page {
   min-height: 100vh;
+  background: #ffffff;
 }
 
-/* Header Styles */
-.main-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
-
-.header-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-}
-
-.header-logo {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
-}
-
-.logo-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.company-name-header {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: #16a34a;
-  letter-spacing: 0.05em;
-  line-height: 1;
-}
-
-.company-subtitle {
-  font-size: 0.75rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-}
-
-.nav-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.nav-link {
-  color: #374151;
-  text-decoration: none;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: color 0.2s ease;
-  cursor: pointer;
-}
-
-.nav-link:hover {
-  color: #16a34a;
-}
-
-.nav-link.router-link-active {
-  color: #16a34a;
-  font-weight: 600;
-}
-
-.header-search {
-  flex: 1;
-  max-width: 400px;
-}
-
-.search-input-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-icon {
-  position: absolute;
-  left: 0.75rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  color: #6b7280;
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.search-input:focus {
-  border-color: #16a34a;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.login-button {
-  padding: 0.5rem 1.5rem;
-  background: #16a34a;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.login-button:hover {
-  background: #15803d;
-  transform: translateY(-1px);
-}
-
-/* User Menu Styles */
-.user-menu {
-  position: relative;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.user-info:hover {
-  background: #f3f4f6;
-}
-
-.user-menu:hover .user-dropdown {
-  display: block;
-}
-
-.user-avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.user-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  min-width: 180px;
-  z-index: 1000;
-  margin-top: 0.5rem;
-}
-
-.dropdown-item {
-  display: block;
-  padding: 0.75rem 1rem;
-  color: #374151;
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: background 0.2s ease;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background: #f3f4f6;
-}
-
-.dropdown-item:first-child {
-  border-radius: 0.5rem 0.5rem 0 0;
-}
-
-.dropdown-item:last-child {
-  border-radius: 0 0 0.5rem 0.5rem;
-}
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-  backdrop-filter: blur(4px);
-}
-
-.modal-content {
-  background: white;
-  border-radius: 1rem;
-  width: 100%;
-  max-width: 400px;
-  margin: 1rem;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.modal-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  padding: 0.25rem;
-  cursor: pointer;
-  color: #6b7280;
-  border-radius: 0.375rem;
-  transition: all 0.2s ease;
-}
-
-.modal-close:hover {
-  color: #374151;
-  background: #f9fafb;
-}
-
-.modal-close svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-.form-input {
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  outline: none;
-  transition: all 0.2s ease;
-}
-
-.form-input:focus {
-  border-color: #16a34a;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #6b7280;
-  cursor: pointer;
-}
-
-.checkbox-container input[type='checkbox'] {
-  margin: 0;
-}
-
-.submit-button {
-  padding: 0.75rem;
-  background: #16a34a;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.submit-button:hover:not(:disabled) {
-  background: #15803d;
-}
-
-.submit-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.loading-spinner {
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid transparent;
-  border-top: 2px solid currentColor;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-.modal-footer {
-  padding-top: 1rem;
-  border-top: 1px solid #f3f4f6;
-  text-align: center;
-}
-
-.footer-text {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.footer-link {
-  color: #16a34a;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.footer-link:hover {
-  text-decoration: underline;
-}
-
-/* ✅ Hero Section - UPDATED */
+/* ===========================
+   HERO SECTION
+   =========================== */
 .hero-section {
   position: relative;
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #166534 100%);
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 50%, #15803d 100%);
   color: white;
-  padding: 3rem 1rem 3rem;
-  min-height: 45vh;
+  padding: 5rem 1rem 3rem;
+  min-height: 50vh;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-top: 60px;
 }
 
 .hero-overlay {
@@ -1255,7 +472,9 @@ $light_gray: #eee;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  background:
+    radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.2) 100%),
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -1284,16 +503,23 @@ $light_gray: #eee;
 }
 
 .tree-illustration {
+  position: relative;
   margin-bottom: 1rem;
 }
 
 .logo-img {
   max-width: 300px;
   height: auto;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.4));
+  animation: breathe 4s ease-in-out infinite;
 }
 
-/* ✅ NEW: Hero Search Bar Styles */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+/* Hero Search Bar */
 .hero-search-container {
   max-width: 700px;
   margin: 0 auto 2rem;
@@ -1333,6 +559,7 @@ $light_gray: #eee;
   font-size: 1rem;
   background: transparent;
   color: #1f2937;
+  border-radius: 9999px;
 }
 
 .hero-search-input::placeholder {
@@ -1372,7 +599,7 @@ $light_gray: #eee;
   font-weight: 500;
 }
 
-/* ✅ NEW: Quick Access Buttons */
+/* Quick Access Buttons */
 .quick-access {
   display: flex;
   gap: 1rem;
@@ -1407,7 +634,9 @@ $light_gray: #eee;
   font-size: 1.125rem;
 }
 
-/* Articles Section */
+/* ===========================
+   ARTICLES SECTION
+   =========================== */
 .articles-section {
   padding: 4rem 1rem;
   background: white;
@@ -1431,11 +660,13 @@ $light_gray: #eee;
   font-size: 1.875rem;
   font-weight: 700;
   color: #1f2937;
+  margin: 0;
 }
 
 .section-nav {
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .section-nav .nav-link {
@@ -1445,6 +676,7 @@ $light_gray: #eee;
   text-decoration: none;
   border-radius: 0.5rem;
   font-size: 0.875rem;
+  font-weight: 500;
   transition: all 0.2s ease;
   cursor: pointer;
 }
@@ -1466,14 +698,14 @@ $light_gray: #eee;
   background: white;
   border-radius: 1rem;
   padding: 1.5rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border: 1px solid #f3f4f6;
   transition: all 0.3s ease;
 }
 
 .article-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
 .article-header {
@@ -1494,18 +726,22 @@ $light_gray: #eee;
   background: #fee2e2;
   color: #dc2626;
 }
+
 .badge-green {
   background: #dcfce7;
   color: #16a34a;
 }
+
 .badge-purple {
   background: #f3e8ff;
   color: #9333ea;
 }
+
 .badge-blue {
   background: #dbeafe;
   color: #2563eb;
 }
+
 .badge-gray {
   background: #f3f4f6;
   color: #6b7280;
@@ -1520,7 +756,7 @@ $light_gray: #eee;
   font-size: 1.125rem;
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 0.75rem;
+  margin: 0 0 0.75rem 0;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1532,6 +768,7 @@ $light_gray: #eee;
   color: #6b7280;
   margin-bottom: 1rem;
   line-height: 1.5;
+  font-size: 0.875rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -1543,8 +780,8 @@ $light_gray: #eee;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
-  font-size: 0.875rem;
-  color: #6b7280;
+  padding-top: 1rem;
+  border-top: 1px solid #f3f4f6;
 }
 
 .article-author {
@@ -1560,6 +797,11 @@ $light_gray: #eee;
   object-fit: cover;
 }
 
+.author-name {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
 .article-rating {
   display: flex;
   align-items: center;
@@ -1568,6 +810,11 @@ $light_gray: #eee;
 
 .rating-star {
   font-size: 1rem;
+}
+
+.rating-text {
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .article-actions {
@@ -1579,6 +826,7 @@ $light_gray: #eee;
   align-items: center;
   color: #16a34a;
   font-weight: 500;
+  font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.2s ease;
 }
@@ -1591,39 +839,16 @@ $light_gray: #eee;
   width: 1rem;
   height: 1rem;
   margin-left: 0.25rem;
+  transition: transform 0.2s ease;
 }
 
-.view-all-container {
-  text-align: center;
-  margin-top: 3rem;
+.read-more-btn:hover .read-more-arrow {
+  transform: translateX(3px);
 }
 
-.view-all-button {
-  display: inline-flex;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: #16a34a;
-  color: white;
-  text-decoration: none;
-  border-radius: 0.75rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-}
-
-.view-all-button:hover {
-  background: #15803d;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(22, 163, 74, 0.4);
-}
-
-.view-all-arrow {
-  width: 1.25rem;
-  height: 1.25rem;
-  margin-left: 0.5rem;
-}
-
-/* Categories Section */
+/* ===========================
+   CATEGORIES SECTION
+   =========================== */
 .categories-section {
   padding: 4rem 1rem;
   background: #f9fafb;
@@ -1634,7 +859,11 @@ $light_gray: #eee;
   margin-bottom: 3rem;
 }
 
-/* Categories Slider Container */
+.section-header-center .section-title {
+  margin: 0;
+}
+
+/* Categories Slider */
 .categories-slider-container {
   position: relative;
   max-width: 1320px;
@@ -1721,6 +950,10 @@ $light_gray: #eee;
 .category-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-color: #16a34a;
+}
+
+.category-card:hover .category-name {
   color: #16a34a;
 }
 
@@ -1732,7 +965,8 @@ $light_gray: #eee;
 .category-name {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #1f2937;
   transition: color 0.2s ease;
 }
 
@@ -1740,13 +974,18 @@ $light_gray: #eee;
   font-size: 0.875rem;
   color: #16a34a;
   font-weight: 500;
+  margin: 0;
 }
 
-/* Loading Spinner */
+/* ===========================
+   LOADING SPINNER
+   =========================== */
 .loading-container {
   display: flex;
   justify-content: center;
+  align-items: center;
   padding: 3rem;
+  min-height: 200px;
 }
 
 .spinner {
@@ -1767,48 +1006,19 @@ $light_gray: #eee;
   }
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .header-container {
-    gap: 1rem;
-  }
+/* ===========================
+   RESPONSIVE DESIGN
+   =========================== */
 
-  .header-search {
-    max-width: 300px;
+/* Tablet */
+@media (max-width: 1024px) {
+  .articles-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   }
 }
 
+/* Mobile Large */
 @media (max-width: 768px) {
-  .header-container {
-    flex-wrap: wrap;
-    padding: 0.75rem 1rem;
-  }
-
-  .header-nav {
-    order: 3;
-    width: 100%;
-  }
-
-  .nav-links {
-    justify-content: center;
-    width: 100%;
-  }
-
-  .header-search {
-    order: 2;
-    max-width: none;
-    flex: 1;
-    min-width: 200px;
-  }
-
-  .header-actions {
-    order: 1;
-  }
-
-  .section-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
   .section-nav {
     justify-content: center;
@@ -1819,7 +1029,7 @@ $light_gray: #eee;
   }
 
   .hero-section {
-    padding: 5rem 1rem 3rem;
+    padding: 4rem 1rem 3rem;
     min-height: 50vh;
   }
 
@@ -1869,10 +1079,12 @@ $light_gray: #eee;
   }
 }
 
+/* Mobile Small */
 @media (max-width: 480px) {
   .hero-section {
-    padding: 4rem 0.5rem 2.5rem;
+    padding: 3.5rem 0.5rem 2.5rem;
     min-height: 45vh;
+    margin-top: 60px;
   }
 
   .logo-img {
@@ -1932,31 +1144,17 @@ $light_gray: #eee;
     font-size: 1rem;
   }
 
-  .header-container {
-    flex-direction: column;
-    gap: 0.75rem;
+  .section-title {
+    font-size: 1.5rem;
   }
 
-  .header-logo {
-    align-self: flex-start;
+  .section-nav .nav-link {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
-  .header-search {
-    order: 2;
-    width: 100%;
-  }
-
-  .header-actions {
-    order: 3;
-    align-self: flex-end;
-  }
-
-  .nav-links {
-    gap: 1rem;
-  }
-
-  .modal-content {
-    margin: 0.5rem;
+  .article-card {
+    padding: 1.25rem;
   }
 
   .categories-slider-wrapper {
@@ -1989,6 +1187,31 @@ $light_gray: #eee;
   .slider-nav-button svg {
     width: 0.875rem;
     height: 0.875rem;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+  .logo-img {
+    max-width: 180px;
+  }
+
+  .hero-section {
+    padding: 3rem 0.5rem 2rem;
+  }
+
+  .quick-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.7rem;
+  }
+
+  .articles-section,
+  .categories-section {
+    padding: 3rem 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1.375rem;
   }
 }
 </style>
